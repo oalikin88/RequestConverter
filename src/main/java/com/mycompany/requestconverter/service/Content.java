@@ -19,13 +19,13 @@ public class Content {
     
       public List<String> getContent() throws IOException {
         
-        Path path = Paths.get("C:\\Users\\041AlikinOS\\Documents\\NetBeansProjects\\RequestConverter\\src\\main\\java\\com\\mycompany\\requestconverter\\data\\spr.csv");
+        Path path = Paths.get("src/main/java/com/mycompany/requestconverter/data/spr.csv");
         List<String> list = Files.readAllLines(path);
         return list;
     }
       
       public List<String> getRequests() throws IOException {
-          Path path = Paths.get("C:\\Users\\041AlikinOS\\Documents\\NetBeansProjects\\RequestConverter\\src\\main\\java\\com\\mycompany\\requestconverter\\data\\request.csv");
+          Path path = Paths.get("src/main/java/com/mycompany/requestconverter/data/request.csv");
           List<String> list = Files.readAllLines(path);
           return list;
       }
