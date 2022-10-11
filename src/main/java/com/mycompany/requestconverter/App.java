@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import javafx.scene.image.Image;
 
 /**
  * JavaFX App
@@ -23,7 +24,8 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         scene = new Scene(loadFXML("primary"), 600, 400);
-        stage.setTitle("Конвертер запросов");
+        stage.getIcons().add(new Image("icons/icon.png"));
+        stage.setTitle("Конвертер запросов ПФР");
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
