@@ -2,8 +2,8 @@ package com.mycompany.requestconverter;
 
 import com.mycompany.requestconverter.service.Content;
 import com.mycompany.requestconverter.service.ConvertList;
-import com.mycompany.requestconverter.service.RequestListManipulation;
-import com.mycompany.requestconverter.service.UpfrList;
+import com.mycompany.requestconverter.service.CustomtListManipulation;
+import com.mycompany.requestconverter.service.RequestFormirovationService;
 import com.mycompany.requestconverter.service.ZipFileService;
 import java.io.File;
 import java.io.IOException;
@@ -12,9 +12,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -110,16 +114,14 @@ public class PrimaryController {
         directoryChooser.setTitle("Выберите директорию куда сохранить файл");
         directoryChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
 
-        StringBuilder str = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
         // Обработка requestList 
-        List<String> rList = RequestListManipulation.getRequestList(requestList);
-        
+        List<String> rList = CustomtListManipulation.getRequestList(requestList);
+
         ObservableList<String> requests = FXCollections.observableArrayList(rList);
         requestFile.setItems(requests);
         requestFile.setValue(requests.get(0));
-
-        StringBuilder sb = new StringBuilder();
 
         choiceFile.setOnAction(event -> {
 
@@ -135,52 +137,23 @@ public class PrimaryController {
 
         });
 
+        // инициализация двумерного массива из списка spr
         String[][] array = ConvertList.listToTwoArray(list);
-        List<String> opfrList = new ArrayList<>();
-        for (int i = 0; i < array.length; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (j == 2 && array[i][j].equals("000")) {
-                    opfrList.add(array[i][3]);
-
-                }
-            }
-        }
-
+        // получение списка ОПФР из общего массива
+        List<String> opfrList = CustomtListManipulation.getOpfrList(array);
         ObservableList<String> oList = FXCollections.observableArrayList(opfrList);
         opfr.setItems(oList);
         opfr.setValue(oList.get(0));
-        String value = opfr.getValue();
 
         int element = opfrList.indexOf(opfr.getValue());
-
-        ObservableList<String> upfrList = FXCollections.observableArrayList(UpfrList.getUpfrList(array, element));
-
-        for (int i = element; i <= element; i++) {
-            for (int j = 0; j < 4; j++) {
-                System.out.println(array[i][j]);
-            }
-        }
+        // получение списка УПФР из общего массива
+        ObservableList<String> upfrList = FXCollections.observableArrayList(CustomtListManipulation.getUpfrList(array, element));
 
         upfr.setItems(upfrList);
         upfr.setValue(upfrList.get(0));
-        StringBuilder val = new StringBuilder();
         opfr.setOnAction(event -> {
-            int b = opfrList.indexOf(opfr.getValue());
-            String s = (opfr.getValue());
-            String buf = "";
-            List<String> target = new ArrayList<>();
-            for (int i = 0; i < array.length; i++) {
-                if (array[i][3].equals(s)) {
-                    buf = array[i][0];
-                }
-            }
-            for (int i = 0; i < array.length; i++) {
-                if (array[i][0].equals(buf) && !array[i][2].equals("000")) {
-
-                    target.add(array[i][3]);
-                }
-            }
-
+            // получение списка упфр при смене элемента в choicebox ОПФР
+            List<String> target = CustomtListManipulation.getChangeUpfrList(array, opfr.getValue());
             ObservableList<String> upfrList2 = FXCollections.observableArrayList(target);
             upfr.setItems(upfrList2);
             upfr.setValue(upfrList2.get(0));
@@ -188,57 +161,62 @@ public class PrimaryController {
         }
         );
 
+        firstName.textProperty().addListener(new ChangeListener<String>() {
+            int maxLength = 1;
+
+            @Override
+            public void changed(ObservableValue<? extends String> ov, String t, String t1) {
+                if (firstName.getText().length() > maxLength) {
+                    String s = firstName.getText().substring(0, maxLength);
+                    firstName.setText(s);
+                }
+            }
+        });
+
+        fathersName.textProperty().addListener(new ChangeListener<String>() {
+            int maxLength = 1;
+
+            @Override
+            public void changed(ObservableValue<? extends String> ov, String t, String t1) {
+                if (fathersName.getText().length() > maxLength) {
+                    String s = fathersName.getText().substring(0, maxLength);
+                    fathersName.setText(s);
+                }
+            }
+        });
+
         start.setOnAction(event -> {
 
+            // инициализация имени
             String fName = firstName.getText();
+            // инициализация отчества
             String fathName = fathersName.getText();
+            // инициализация фамилии
             String sName = surname.getText();
-            System.out.println(sName);
-            System.out.println(fName);
-            System.out.println(fathName);
 
-            // Вывод запроса в консоль
-            // начало
-            sb.delete(0, sb.capacity());
-            sb.append(requestFile.getValue());
-            for (String s : requestList) {
-                int i = s.indexOf(";");
-                if (s.substring(0, i).equals(sb.toString())) {
-
-                    sb.delete(0, sb.capacity());
-                    sb.append(s.substring(++i, s.length()));
-                }
+            // Ошибка если поля с ФИО пустые - доработать и вынести в отдельный метод
+            if (fName.isEmpty() || fathName.isEmpty() || sName.isEmpty()) {
+                Alert alert = new Alert(AlertType.WARNING);
+                alert.setTitle("Ошибка");
+                alert.setHeaderText("Осталось незаполенное поле");
+                alert.setContentText("Careful with the next step!");
+                alert.showAndWait();
+                return;
             }
-            System.out.println(sb);
-            // конец
 
-            // Вывод кода района в консоль
-            // начало
-            val.delete(0, val.capacity());
-            for (int i = 0; i < array.length; i++) {
-                for (int j = 0; j < 4; j++) {
-                    if (array[i][j].equals(upfr.getValue())) {
-                        val.append(array[i][j - 3]);
-                        val.append(array[i][j - 2]);
-                        val.append(array[i][j - 1]);
+            // Получение кода района
+            String val = RequestFormirovationService.getRequestCode(array, upfr.getValue());
 
-                    }
-                }
-            }
-            System.out.println(val);
-
-            // конец
-            // Вывод пути сохранения файла
-            // начало
-            str.append(showFileSavePath.getText() + "\\");
-            System.out.println(str);
-            // конец
+            // Получение пути сохранения файла
+            String str = showFileSavePath.getText() + "\\";
 
             StringBuilder out = new StringBuilder();
+            out.delete(0, out.length());
+
             out.append(str);
             out.append(val);
             out.append("_");
-            out.append(sb);
+            out.append(RequestFormirovationService.getRequestValue(requestList, requestFile.getValue()));
             out.append("_");
             out.append(sName);
             out.append(" ");
@@ -252,6 +230,12 @@ public class PrimaryController {
 
                 Path path = Path.of(fileNameView.getText());
                 ZipFileService.zipSingleFile(path, out.toString());
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Сообщение");
+                alert.setHeaderText(null);
+                alert.setContentText("Запрос успешно сконвертирован");
+
+                alert.showAndWait();
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -260,25 +244,6 @@ public class PrimaryController {
         });
 
         System.out.println("Done");
-
-        assert saveFilePath != null : "fx:id=\"SaveFilePath\" as not injected: check your FXML file 'primary.fxml'.";
-        assert about != null : "fx:id=\"about\" was not injected: check your FXML file 'primary.fxml'.";
-        assert checkUpdate != null : "fx:id=\"checkUpdate\" was not injected: check your FXML file 'primary.fxml'.";
-        assert choiceFile != null : "fx:id=\"choiceFile\" was not injected: check your FXML file 'primary.fxml'.";
-        assert fathersName != null : "fx:id=\"fathersName\" was not injected: check your FXML file 'primary.fxml'.";
-        assert fileNameView != null : "fx:id=\"fileNameView\" was not injected: check your FXML file 'primary.fxml'.";
-        assert firstName != null : "fx:id=\"firstName\" was not injected: check your FXML file 'primary.fxml'.";
-        assert instruction != null : "fx:id=\"instruction\" was not injected: check your FXML file 'primary.fxml'.";
-        assert menu != null : "fx:id=\"menu\" was not injected: check your FXML file 'primary.fxml'.";
-        assert menuCloseButton != null : "fx:id=\"menuCloseButton\" was not injected: check your FXML file 'primary.fxml'.";
-        assert menuFile != null : "fx:id=\"menuFile\" was not injected: check your FXML file 'primary.fxml'.";
-        assert opfr != null : "fx:id=\"opfr\" was not injected: check your FXML file 'primary.fxml'.";
-        assert remember != null : "fx:id=\"remember\" was not injected: check your FXML file 'primary.fxml'.";
-        assert requestFile != null : "fx:id=\"requestFile\" was not injected: check your FXML file 'primary.fxml'.";
-        assert start != null : "fx:id=\"start\" was not injected: check your FXML file 'primary.fxml'.";
-        assert statusBar != null : "fx:id=\"statusBar\" was not injected: check your FXML file 'primary.fxml'.";
-        assert surname != null : "fx:id=\"surname\" was not injected: check your FXML file 'primary.fxml'.";
-        assert upfr != null : "fx:id=\"upfr\" was not injected: check your FXML file 'primary.fxml'.";
 
     }
 }
