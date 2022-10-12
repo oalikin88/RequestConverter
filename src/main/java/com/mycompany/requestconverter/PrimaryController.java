@@ -2,6 +2,7 @@ package com.mycompany.requestconverter;
 
 import com.mycompany.requestconverter.service.Content;
 import com.mycompany.requestconverter.service.ConvertList;
+import com.mycompany.requestconverter.service.RequestListManipulation;
 import com.mycompany.requestconverter.service.UpfrList;
 import com.mycompany.requestconverter.service.ZipFileService;
 import java.io.File;
@@ -96,46 +97,43 @@ public class PrimaryController {
     @FXML
     void initialize() throws IOException {
 
+        // инициализация списков
+        List<String> list = Content.getContent();
+        List<String> requestList = Content.getRequests();
+
+        // инициализация кнопок открыть файл и сохранить файл
         Stage stage = new Stage();
         FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Выберите файл для конвертирования");
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
         final DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setInitialDirectory(new File("src"));
+        directoryChooser.setTitle("Выберите директорию куда сохранить файл");
+        directoryChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
+
         StringBuilder str = new StringBuilder();
-        Content content = new Content();
-        List<String> list = content.getContent();
-        List<String> requestList = content.getRequests();
+
+        // Обработка requestList 
+        List<String> rList = RequestListManipulation.getRequestList(requestList);
         
-        List<String> rList = new ArrayList<>();
-        for (String s : requestList) {
-            int i = s.indexOf(";");
-            rList.add(s.substring(0, i));
-        }
-         ObservableList<String> requests = FXCollections.observableArrayList(rList);
+        ObservableList<String> requests = FXCollections.observableArrayList(rList);
         requestFile.setItems(requests);
         requestFile.setValue(requests.get(0));
-        
+
         StringBuilder sb = new StringBuilder();
-    
-        
-        
-        
+
         choiceFile.setOnAction(event -> {
 
             File selectedFile = fileChooser.showOpenDialog(stage);
             fileNameView.setText(selectedFile.getAbsolutePath());
             fileNameView.setTooltip(new Tooltip(selectedFile.getAbsolutePath()));
         });
-        
-        
 
         saveFilePath.setOnAction(event -> {
             File selectedDirectory = directoryChooser.showDialog(stage);
             showFileSavePath.setText(selectedDirectory.getAbsolutePath());
             showFileSavePath.setTooltip(new Tooltip(selectedDirectory.getAbsolutePath()));
-            
-        });
 
-       
+        });
 
         String[][] array = ConvertList.listToTwoArray(list);
         List<String> opfrList = new ArrayList<>();
@@ -186,76 +184,71 @@ public class PrimaryController {
             ObservableList<String> upfrList2 = FXCollections.observableArrayList(target);
             upfr.setItems(upfrList2);
             upfr.setValue(upfrList2.get(0));
-              
-     
+
         }
         );
-      
 
-        
         start.setOnAction(event -> {
-        
+
             String fName = firstName.getText();
             String fathName = fathersName.getText();
             String sName = surname.getText();
             System.out.println(sName);
             System.out.println(fName);
             System.out.println(fathName);
-            
+
             // Вывод запроса в консоль
             // начало
-             sb.delete(0, sb.capacity());
+            sb.delete(0, sb.capacity());
             sb.append(requestFile.getValue());
             for (String s : requestList) {
                 int i = s.indexOf(";");
-                if(s.substring(0, i).equals(sb.toString())) {
-                    
+                if (s.substring(0, i).equals(sb.toString())) {
+
                     sb.delete(0, sb.capacity());
                     sb.append(s.substring(++i, s.length()));
                 }
-        }
+            }
             System.out.println(sb);
             // конец
-            
+
             // Вывод кода района в консоль
             // начало
             val.delete(0, val.capacity());
-               for(int i = 0; i < array.length; i++) {
-                   for(int j = 0; j < 4; j++) {
-                        if(array[i][j].equals(upfr.getValue())) {
-                            val.append(array[i][j-3]);
-                            val.append(array[i][j-2]);
-                            val.append(array[i][j-1]);
-                    
-                        }
+            for (int i = 0; i < array.length; i++) {
+                for (int j = 0; j < 4; j++) {
+                    if (array[i][j].equals(upfr.getValue())) {
+                        val.append(array[i][j - 3]);
+                        val.append(array[i][j - 2]);
+                        val.append(array[i][j - 1]);
+
                     }
                 }
-               System.out.println(val);
-                   
-        // конец
-        
-                // Вывод пути сохранения файла
-        // начало
-        str.append(showFileSavePath.getText() + "\\");
-        System.out.println(str);
-        // конец
-        
-        
-               StringBuilder out = new StringBuilder();
-                out.append(str);
-                out.append(val);
-                out.append("_");
-                out.append(sb);
-                out.append("_");
-                out.append(sName);
-                out.append(" ");
-                out.append(fName);
-                out.append(". ");
-                out.append(fathName);
-                out.append(".zip");
-                System.out.println(out);
-                
-                    try {
+            }
+            System.out.println(val);
+
+            // конец
+            // Вывод пути сохранения файла
+            // начало
+            str.append(showFileSavePath.getText() + "\\");
+            System.out.println(str);
+            // конец
+
+            StringBuilder out = new StringBuilder();
+            out.append(str);
+            out.append(val);
+            out.append("_");
+            out.append(sb);
+            out.append("_");
+            out.append(sName);
+            out.append(" ");
+            out.append(fName);
+            out.append(". ");
+            out.append(fathName);
+            out.append(".zip");
+            System.out.println(out);
+
+            try {
 
                 Path path = Path.of(fileNameView.getText());
                 ZipFileService.zipSingleFile(path, out.toString());
@@ -263,13 +256,11 @@ public class PrimaryController {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-         
+
         });
-    
-       
-         
-         System.out.println("Done");
-        
+
+        System.out.println("Done");
+
         assert saveFilePath != null : "fx:id=\"SaveFilePath\" as not injected: check your FXML file 'primary.fxml'.";
         assert about != null : "fx:id=\"about\" was not injected: check your FXML file 'primary.fxml'.";
         assert checkUpdate != null : "fx:id=\"checkUpdate\" was not injected: check your FXML file 'primary.fxml'.";

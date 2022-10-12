@@ -14,22 +14,34 @@ import java.util.List;
  *
  * @author 041AlikinOS
  */
-
-
 public class Content {
-    
-    
-      public List<String> getContent() throws IOException {
-        
-        Path path = Paths.get("src/main/java/com/mycompany/requestconverter/data/spr.csv");
-        List<String> list = Files.readAllLines(path);
-        return list;
+
+    private static final String pathToSpr = "src/main/java/com/mycompany/requestconverter/data/spr.csv";
+    private static final String pathToRequest = "src/main/java/com/mycompany/requestconverter/data/request.csv";
+
+    public static List<String> getContent() throws IOException {
+        try {
+            Path getPath = Paths.get(pathToSpr);
+            List<String> list = Files.readAllLines(getPath);
+            return list;
+        } catch (IOException e) {
+            e.getStackTrace();
+            throw new IOException("Отсутствует файл spr.csv");
+
+        }
+
     }
-      
-      public List<String> getRequests() throws IOException {
-          Path path = Paths.get("src/main/java/com/mycompany/requestconverter/data/request.csv");
-          List<String> list = Files.readAllLines(path);
-          return list;
-      }
-    
+
+    public static List<String> getRequests() throws IOException {
+        try {
+            Path getPath = Paths.get(pathToRequest);
+            List<String> list = Files.readAllLines(getPath);
+            return list;
+        } catch (IOException e) {
+            e.getStackTrace();
+            throw new IOException("Отсутствует файл request.csv");
+        }
+
+    }
+
 }
