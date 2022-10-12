@@ -14,7 +14,6 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.requestconverter.PrimaryController">
    <children>
       <AnchorPane prefHeight="47.0" prefWidth="600.0" />
@@ -24,8 +23,8 @@
       <ChoiceBox fx:id="upfr" layoutX="144.0" layoutY="209.0" prefHeight="25.0" prefWidth="437.0" />
       <ChoiceBox fx:id="opfr" layoutX="144.0" layoutY="176.0" prefHeight="25.0" prefWidth="437.0" />
       <TextField fx:id="surname" layoutX="144.0" layoutY="244.0" />
-      <TextField fx:id="firstName" layoutX="178.0" layoutY="281.0" prefHeight="25.0" prefWidth="24.0" />
-      <TextField fx:id="fathersName" layoutX="269.0" layoutY="281.0" prefHeight="25.0" prefWidth="24.0" />
+      <TextField fx:id="firstName" layoutX="178.0" layoutY="280.0" prefHeight="25.0" prefWidth="25.0" />
+      <TextField fx:id="fathersName" layoutX="269.0" layoutY="281.0" prefHeight="25.0" prefWidth="25.0" />
       <Button fx:id="start" layoutX="480.0" layoutY="322.0" mnemonicParsing="false" text="Преобразовать" />
       <CheckBox fx:id="remember" layoutX="34.0" layoutY="326.0" mnemonicParsing="false" text="Добавить напоминание при формировании запроса" />
       <Text fontSmoothingType="LCD" layoutX="14.0" layoutY="45.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Преобразование файла перед отправкой" textAlignment="CENTER" textOrigin="CENTER" wrappingWidth="558.896484375">
@@ -38,7 +37,7 @@
           <Menu fx:id="menuFile" mnemonicParsing="false" text="Файл">
             <items>
               <MenuItem fx:id="checkUpdate" mnemonicParsing="false" text="Проверить обновление" />
-                  <MenuItem fx:id="menuCloseButton" mnemonicParsing="false" text="Close" />
+                  <MenuItem fx:id="menuCloseButton" mnemonicParsing="false" text="Закрыть" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Справка">
@@ -71,4 +70,3 @@
       <Label fx:id="showFileSavePath" layoutX="150.0" layoutY="112.0" prefHeight="17.0" prefWidth="351.0" />
    </children>
 </AnchorPane>
-
