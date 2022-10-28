@@ -7,12 +7,16 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import javafx.animation.FadeTransition;
 import javafx.scene.image.Image;
+import javafx.util.Duration;
 
 /**
  * JavaFX App
  */
 public class App extends Application {
+    
+
 
     private static Scene scene;
 
@@ -29,6 +33,10 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+         FadeTransition fadeOutTransition = new FadeTransition(Duration.millis(1000), scene.getRoot());
+                fadeOutTransition.setFromValue(0.0);
+                fadeOutTransition.setToValue(1.0);
+                fadeOutTransition.play();
     }
 
     static void setRoot(String fxml) throws IOException {
