@@ -1,72 +1,54 @@
 package com.mycompany.requestconverter;
 
+import com.mycompany.requestconverter.data.ClientDAO;
 import com.mycompany.requestconverter.data.Record;
+import com.mycompany.requestconverter.data.DataHistory;
+import com.mycompany.requestconverter.data.Request;
 import com.mycompany.requestconverter.service.Content;
 import com.mycompany.requestconverter.service.ConvertList;
 import com.mycompany.requestconverter.service.CustomListManipulation;
+import com.mycompany.requestconverter.service.DateComareList;
 import com.mycompany.requestconverter.service.RequestFormirovationService;
-import com.mycompany.requestconverter.service.Validator;
 import com.mycompany.requestconverter.service.ZipFileService;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.text.ParseException;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.function.Predicate;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
-import javafx.animation.FadeTransition;
-import javafx.animation.FillTransition;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.css.Style;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.scene.Group;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.effect.BlendMode;
-import javafx.scene.effect.Bloom;
-import javafx.scene.effect.BoxBlur;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.ColorInput;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.Lighting;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 public class PrimaryController {
 
@@ -83,7 +65,7 @@ public class PrimaryController {
     private MenuItem about;
 
     @FXML
-    private MenuItem checkUpdate;
+    private MenuItem getUpdate;
 
     @FXML
     private Button choiceFile;
@@ -134,21 +116,74 @@ public class PrimaryController {
     private Label invalidDetails;
 
     @FXML
-    private ChoiceBox<String> upfr;
-    
-    
-    private String fName;
-    
+    private Label statusBarInfo;
 
-  
-    
     @FXML
-    void initialize() throws IOException {
+    private ChoiceBox<String> upfr;
+
+    private String fName;
+    private List<DataHistory> sprs;
+    private List<DataHistory> requests;
+    private List<Record> recordList;
+    private List<Request> requestsList;
+    private int compareDataHistoryList1;
+    private int compareDataHistoryList2;
+    private List<String> list;
+    private List<String> requestList;
+    ObservableList<String> oList;
+    List<Record> opfrList;
+    List<Record> records;
+    String[][] array;
+    List<String> rList;
+    ObservableList<String> requestsObserverableList;
+
+    @FXML
+    void initialize() throws IOException, ParseException {
 
         //Group root = new Group();
         // инициализация списков
-        List<String> list = Content.getContent();
-        List<String> requestList = Content.getRequests();
+        list = Content.getContent();
+        requestList = Content.getRequests();
+        ClientDAO sprHistoryClient = new ClientDAO();
+        ClientDAO requestHistoryClient = new ClientDAO();
+        sprs = sprHistoryClient.getLastChangeFromSpr();
+        requests = requestHistoryClient.getLastChangeFromRequest();
+        System.out.println(sprs);
+        System.out.println("*****************");
+        System.out.println(requests);
+        System.out.println("*****************");
+        List<String> sprHistoryStrings = Content.getSprHistoryContent();
+        List<String> requestHistoryStrings = Content.getRequestHistoryContent();
+        ConvertList convertSprList = new ConvertList();
+        ConvertList convertRequestList = new ConvertList();
+        List<DataHistory> sprHistory = convertSprList.getDataHistory(sprHistoryStrings);
+        List<DataHistory> requestHistory = convertRequestList.getDataHistory(requestHistoryStrings);
+        System.out.println(sprHistory);
+        compareDataHistoryList1 = DateComareList.compareDataHistoryList(sprs, sprHistory);
+        compareDataHistoryList2 = DateComareList.compareDataHistoryList(requests, requestHistory);
+        System.out.println(requestHistory);
+
+        if (compareDataHistoryList1 == -1 || compareDataHistoryList2 == -1) {
+            statusBarInfo.setText("Требуется обновить базу данных");
+            Dialog<ButtonType> dialog = new Dialog<>();
+            DialogPane dialogPane = dialog.getDialogPane();
+            dialog.setTitle("Сообщение");
+            dialog.setHeaderText("Доступно обновление базы данных");
+            dialogPane.setContentText("Вы желаете обновить базу данных?");
+              dialog.getDialogPane().getButtonTypes().addAll(
+                    new ButtonType("Да", ButtonBar.ButtonData.OK_DONE),
+                    new ButtonType("Нет", ButtonBar.ButtonData.CANCEL_CLOSE));
+
+            Optional<ButtonType> result = dialog.showAndWait();
+            if (result.isPresent()) {
+                if (result.orElseThrow().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+                    getUpdate.fire();
+                }
+                }
+
+        } else {
+            statusBarInfo.setText("Готов к работе");
+        }
 
         // инициализация кнопок открыть файл и сохранить файл
         Stage stage = new Stage();
@@ -161,17 +196,13 @@ public class PrimaryController {
         directoryChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
 
         // Обработка requestList 
-        List<String> rList = CustomListManipulation.getRequestList(requestList);
-        
-        ObservableList<String> requests = FXCollections.observableArrayList(rList);
-        requestFile.setItems(requests);
-        requestFile.setValue(requests.get(0));
-       
-       
-       
-        
+        rList = CustomListManipulation.getRequestList(requestList);
+
+        requestsObserverableList = FXCollections.observableArrayList(rList);
+        requestFile.setItems(requestsObserverableList);
+        requestFile.setValue(requestsObserverableList.get(0));
+
         choiceFile.setOnAction(event -> {
-              
 
             File selectedFile = fileChooser.showOpenDialog(stage);
             fileNameView.setText(selectedFile.getAbsolutePath());
@@ -190,12 +221,12 @@ public class PrimaryController {
         });
 
         // инициализация двумерного массива из списка spr
-        String[][] array = ConvertList.listToTwoArray(list);
+        array = ConvertList.listToTwoArray(list);
         // получение списка ОПФР из общего массива
-        List<Record> records = CustomListManipulation.getRecords(array);
-        
-        List<Record> opfrList = CustomListManipulation.getOpfr(records);
-        ObservableList<String> oList = FXCollections.observableArrayList(opfrList.stream().map(e -> e.getName()).collect(Collectors.toList()));
+        records = CustomListManipulation.getRecords(array);
+
+        opfrList = CustomListManipulation.getOpfr(records);
+        oList = FXCollections.observableArrayList(opfrList.stream().map(e -> e.getName()).collect(Collectors.toList()));
         opfr.setItems(oList);
         opfr.setValue(oList.get(0));
 
@@ -235,12 +266,23 @@ public class PrimaryController {
             }
         });
 
+        // Валидация фамилии
+//        surname.focusedProperty().addListener((arg0, oldValue, newValue) -> {
+//            if (!newValue) { //when focus lost
+//            if(!surname.getText().matches("[1-5]\\.[0-9]|6\\.0")){
+//                //when it not matches the pattern (1.0 - 6.0)
+//                //set the textField empty
+//                surname.setText("");
+//            }
+//        }
+//        });
+
         firstName.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 start.fire();
             }
         });
-        
+
         fathersName.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 start.fire();
@@ -257,103 +299,127 @@ public class PrimaryController {
                 }
             }
         });
-        
-        
-//        start.setOnAction(event -> {
-//
-//            // инициализация имени
-//            String fName = "";
-//            
-//            // инициализация отчества
-//            String fathName = fathersName.getText();
-//            // инициализация фамилии
-//            String sName = surname.getText();
-//
-//            // Ошибка если поля с ФИО пустые - доработать и вынести в отдельный метод
-////            if (fName.isEmpty() || fathName.isEmpty() || sName.isEmpty()) {
-////                Alert alert = new Alert(AlertType.WARNING);
-////                alert.setTitle("Ошибка");
-////                alert.setHeaderText("Осталось незаполенное поле");
-////                alert.setContentText("Careful with the next step!");
-////                alert.showAndWait();
-////                return;
-////            }
-//
-//            // Получение кода района
-//            String val = RequestFormirovationService.getRequestCode(array, upfr.getValue());
-//
-//            // Получение пути сохранения файла
-//            String str = showFileSavePath.getText() + "\\";
-//
-//            StringBuilder out = new StringBuilder();
-//            out.delete(0, out.length());
-//
-//            out.append(str);
-//            out.append(val);
-//            out.append("_");
-//            out.append(RequestFormirovationService.getRequestValue(requestList, requestFile.getValue()));
-//            out.append("_");
-//            out.append(sName);
-//            out.append(" ");
-//            out.append(fName);
-//            out.append(". ");
-//            out.append(fathName);
-//            out.append(".zip");
-//            System.out.println(out);
-//
-////            try {
-////
-////                Path path = Path.of(fileNameView.getText());
-////                ZipFileService.zipSingleFile(path, out.toString());
-////                Alert alert = new Alert(AlertType.INFORMATION);
-////                alert.setTitle("Сообщение");
-////                alert.setHeaderText(null);
-////                alert.setContentText("Запрос успешно сконвертирован");
-////
-////                alert.showAndWait();
-////
-////            } catch (IOException e) {
-////                e.printStackTrace();
-////            }
-//
-//        });
 
- 
-    }
-    
-  @FXML
-    void submit(ActionEvent event) throws InterruptedException {
-            
-      
-        TextField buf = null;
-        
-        try{
-            
-          TextField[] array = {firstName, surname, fathersName};
-        for(TextField s : array) {
-            if(s.getText().isBlank() || s.getText().isEmpty()) {
-                buf = s;
-                throw new NullPointerException();
+        start.setOnAction(event -> {
+
+            // инициализация имени
+            String fName = firstName.getText();
+
+            // инициализация отчества
+            String fathName = fathersName.getText();
+            // инициализация фамилии
+            String sName = surname.getText();
+
+            // Ошибка если поля с ФИО пустые - доработать и вынести в отдельный метод
+//            if (fName.isEmpty() || fathName.isEmpty() || sName.isEmpty()) {
+//                Alert alert = new Alert(AlertType.WARNING);
+//                alert.setTitle("Ошибка");
+//                alert.setHeaderText("Осталось незаполенное поле");
+//                alert.setContentText("Careful with the next step!");
+//                alert.showAndWait();
+//                return;
+//            }
+            // Получение кода района
+            String val = RequestFormirovationService.getRequestCode(array, upfr.getValue());
+
+            // Получение пути сохранения файла
+            String str = showFileSavePath.getText() + "\\";
+
+            StringBuilder out = new StringBuilder();
+            out.delete(0, out.length());
+
+            out.append(str);
+            out.append(val);
+            out.append("_");
+            if(remember.selectedProperty().getValue()) {
+                out.append("(н)");
             }
-        
-        }
-        }
-        catch(NullPointerException e) {    
-                //surname.setBackground(new Background(new BackgroundFill(Color.rgb(255, 0, 0, 0.7), new CornerRadii(5.0), Insets.EMPTY)));
-                
-                Validator.startWork(buf);
-                invalidDetails.setText("Заполните поле \"Имя\"");
-                invalidDetails.setTextFill(Paint.valueOf(Color.RED.toString()));
-                 FadeTransition fadeOutTransition = new FadeTransition(Duration.millis(900), invalidDetails);   
-                fadeOutTransition.setFromValue(1.0);
-                fadeOutTransition.setToValue(0.0);
-                fadeOutTransition.play();            
-        
+            out.append(RequestFormirovationService.getRequestValue(requestList, requestFile.getValue()));
+            out.append("_");
+            out.append(sName);
+            out.append(" ");
+            out.append(fName);
+            out.append(".");
+            out.append(fathName);
+            out.append(".zip");
+            System.out.println(out);
+
+            try {
+
+                Path path = Path.of(fileNameView.getText());
+                ZipFileService.zipSingleFile(path, out.toString());
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Сообщение");
+                alert.setHeaderText(null);
+                alert.setContentText("Запрос успешно сконвертирован");
+
+                alert.showAndWait();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
+
     }
-        
-        
-     System.out.println(fName);
+
+    @FXML
+    void submit(ActionEvent event) throws InterruptedException {
+
     }
-   
+
+    @FXML
+    void actionGetUpdate(ActionEvent event) throws IOException {
+
+        if (compareDataHistoryList1 == -1) {
+            Content.eraseSprData();
+            Content.eraseSprHistory();
+            ClientDAO client = new ClientDAO();
+            recordList = client.findAllRecords();
+            Content.writeSprData(recordList);
+            Content content = new Content();
+            content.writeSprHistory(sprs);
+            statusBarInfo.setText("База данных успешно обновлена");
+            list = Content.getContent();
+            array = ConvertList.listToTwoArray(list);
+            records = CustomListManipulation.getRecords(array);
+            opfrList = CustomListManipulation.getOpfr(records);
+            oList = FXCollections.observableArrayList(opfrList.stream().map(e -> e.getName()).collect(Collectors.toList()));
+            opfr.setItems(oList);
+            opfr.setValue(oList.get(0));
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    statusBarInfo.setText("Готов к работе.");
+                }
+            }, 500);
+            
+        }
+
+        if (compareDataHistoryList2 == -1) {
+            Content.eraseRequestData();
+            Content.eraseRequestHistory();
+            ClientDAO client = new ClientDAO();
+            requestsList = client.findAllRequests();
+            Content.writeRequestData(requestsList);
+            Content content = new Content();
+            content.writeRequestHistory(requests);
+            statusBarInfo.setText("База данных успешно обновлена");
+            requestList = Content.getRequests();
+            rList = CustomListManipulation.getRequestList(requestList);
+            requestsObserverableList = FXCollections.observableArrayList(rList);
+            requestFile.setItems(requestsObserverableList);
+            requestFile.setValue(requestsObserverableList.get(0));
+             Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    statusBarInfo.setText("Готов к работе.");
+                }
+            }, 500);
+        }
+
+    }
 
 }

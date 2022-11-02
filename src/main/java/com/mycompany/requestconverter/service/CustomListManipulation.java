@@ -58,7 +58,6 @@ public class CustomListManipulation {
         for (int i = 0; i < inputList.size(); i++) {
             if (inputList.get(i).getOpfr().equals("000") && inputList.get(i).getUpfr().equals("000")) {
                 parentsList.add(inputList.get(i));
-                System.out.println(inputList.get(i));
             }
         }     
         return parentsList;
@@ -69,7 +68,6 @@ public class CustomListManipulation {
         List<String> list = new ArrayList<>();
         for(Record value : inputList) {
             list.add(value.getOpfr());
-            System.out.println(value.getOpfr());
         }
 
         return list;
@@ -85,7 +83,6 @@ public class CustomListManipulation {
             for (int j = 0; j < 4; j++) {
                 if (array[i][1].equals("000") && array[i][2].equals("000")) {
                     list.add(array[i][3]);
-                    System.out.println(array[i][3]);
 
                 }
             }

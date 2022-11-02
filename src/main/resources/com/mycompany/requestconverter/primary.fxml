@@ -28,7 +28,7 @@
         <menus>
           <Menu fx:id="menuFile" mnemonicParsing="false" text="Файл">
             <items>
-              <MenuItem fx:id="checkUpdate" mnemonicParsing="false" text="Проверить обновление" />
+              <MenuItem fx:id="getUpdate" mnemonicParsing="false" onAction="#actionGetUpdate" text="Получить обновление БД" />
                   <MenuItem fx:id="menuCloseButton" mnemonicParsing="false" text="Закрыть" />
             </items>
           </Menu>
@@ -50,12 +50,13 @@
       <Label layoutX="430.0" layoutY="221.0" prefHeight="17.0" prefWidth="34.0" text="Имя:" />
       <Label layoutX="494.0" layoutY="221.0" prefHeight="17.0" prefWidth="55.0" text="Отчество:" />
       <Label layoutX="24.0" layoutY="374.0" prefHeight="25.0" prefWidth="72.0" text="Статус:" />
-      <Label fx:id="fileNameView" layoutX="150.0" layoutY="75.0" prefHeight="17.0" prefWidth="351.0" />
-      <Label fx:id="showFileSavePath" layoutX="150.0" layoutY="112.0" prefHeight="17.0" prefWidth="351.0" />
+      <Label fx:id="fileNameView" layoutX="150.0" layoutY="47.0" prefHeight="17.0" prefWidth="351.0" />
+      <Label fx:id="showFileSavePath" layoutX="155.0" layoutY="84.0" prefHeight="17.0" prefWidth="351.0" />
       <Label fx:id="invalidDetails" alignment="CENTER" layoutX="18.0" layoutY="291.0" prefHeight="31.0" prefWidth="563.0" textAlignment="CENTER">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
       </Label>
+      <Label fx:id="statusBarInfo" layoutX="74.0" layoutY="374.0" prefHeight="25.0" prefWidth="514.0" textAlignment="CENTER" />
    </children>
 </AnchorPane>
