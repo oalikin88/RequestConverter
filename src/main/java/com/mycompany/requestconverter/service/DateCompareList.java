@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author 041AlikinOS
  */
-public class DateComareList {
+public class DateCompareList {
     
     public static int compareDataHistoryList(List<DataHistory> listFromServer, List<DataHistory> listFromData) {
         

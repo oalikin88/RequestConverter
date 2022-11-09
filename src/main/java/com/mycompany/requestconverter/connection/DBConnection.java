@@ -12,7 +12,7 @@ import java.sql.SQLException;
  *
  * @author 041AlikinOS
  */
-public class DBConnection {
+public class DBConnection  {
 
     private static DBConnection instance = null;
 
@@ -28,10 +28,19 @@ public class DBConnection {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/requestconverter", "root", "qwerty");
-            System.out.println("Connection success!");
+          //  connection = DriverManager.getConnection("jdbc:mysql://23.23.23.23:3306/requestconverter", "root", "qwerty");
+            if(connection != null) {
+                System.out.println("Connection success!");
+                
+            } else {
+                connection.close();
+                System.out.println("Подключение отсутствует");
+            }
+            
         } catch (SQLException e) {
+            
             e.printStackTrace();
-        }
+        } 
         return connection;
     }
 

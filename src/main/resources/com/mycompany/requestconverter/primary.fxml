@@ -9,21 +9,18 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.requestconverter.PrimaryController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="325.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.requestconverter.PrimaryController">
    <children>
       <AnchorPane prefHeight="47.0" prefWidth="600.0" />
-      <Button fx:id="choiceFile" layoutX="518.0" layoutY="43.0" mnemonicParsing="false" text="Выбрать" />
-      <Button fx:id="saveFilePath" layoutX="518.0" layoutY="80.0" mnemonicParsing="false" text="Выбрать" />
-      <ChoiceBox fx:id="requestFile" layoutX="144.0" layoutY="113.0" prefHeight="25.0" prefWidth="437.0" />
-      <ChoiceBox fx:id="upfr" layoutX="144.0" layoutY="181.0" prefHeight="25.0" prefWidth="437.0" />
-      <ChoiceBox fx:id="opfr" layoutX="144.0" layoutY="148.0" prefHeight="25.0" prefWidth="437.0" />
-      <TextField fx:id="surname" layoutX="144.0" layoutY="216.0" prefHeight="25.0" prefWidth="151.0" />
-      <TextField fx:id="firstName" layoutX="464.0" layoutY="216.0" prefHeight="25.0" prefWidth="25.0" />
-      <TextField fx:id="fathersName" layoutX="555.0" layoutY="217.0" prefHeight="25.0" prefWidth="25.0" />
-      <Button fx:id="start" layoutX="263.0" layoutY="334.0" mnemonicParsing="false" onAction="#submit" text="Преобразовать" />
-      <CheckBox fx:id="remember" layoutX="24.0" layoutY="267.0" mnemonicParsing="false" text="Добавить напоминание при формировании запроса" />
+      <ChoiceBox fx:id="requestFile" layoutX="144.0" layoutY="47.0" prefHeight="25.0" prefWidth="437.0" />
+      <ChoiceBox fx:id="upfr" layoutX="144.0" layoutY="124.0" prefHeight="25.0" prefWidth="437.0" />
+      <ChoiceBox fx:id="opfr" layoutX="144.0" layoutY="85.0" prefHeight="25.0" prefWidth="437.0" />
+      <TextField fx:id="surname" layoutX="144.0" layoutY="166.0" prefHeight="25.0" prefWidth="151.0" />
+      <TextField fx:id="firstName" layoutX="464.0" layoutY="166.0" prefHeight="25.0" prefWidth="25.0" />
+      <TextField fx:id="fathersName" layoutX="555.0" layoutY="167.0" prefHeight="25.0" prefWidth="25.0" />
+      <Button fx:id="start" layoutX="263.0" layoutY="246.0" mnemonicParsing="false" onAction="#submit" text="Преобразовать" />
+      <CheckBox fx:id="remember" layoutX="24.0" layoutY="209.0" mnemonicParsing="false" text="Добавить напоминание при формировании запроса" />
       <MenuBar fx:id="menu" prefHeight="25.0" prefWidth="600.0">
         <menus>
           <Menu fx:id="menuFile" mnemonicParsing="false" text="Файл">
@@ -34,29 +31,20 @@
           </Menu>
           <Menu mnemonicParsing="false" text="Справка">
             <items>
-              <MenuItem fx:id="instruction" mnemonicParsing="false" text="Инструкция" />
+              <MenuItem mnemonicParsing="false" onAction="#instruction" text="Инструкция" />
                   <MenuItem fx:id="about" mnemonicParsing="false" text="About" />
             </items>
           </Menu>
         </menus>
       </MenuBar>
-      <Label layoutX="24.0" layoutY="47.0" prefHeight="17.0" prefWidth="72.0" text="Файл:" />
-      <Label layoutX="24.0" layoutY="84.0" prefHeight="17.0" prefWidth="72.0" text="Сохранить в:" />
-      <Label layoutX="24.0" layoutY="117.0" prefHeight="17.0" prefWidth="72.0" text="Запрос:" />
-      <Label layoutX="24.0" layoutY="152.0" prefHeight="17.0" prefWidth="72.0" text="ОПФР:" />
-      <Label layoutX="24.0" layoutY="185.0" prefHeight="17.0" prefWidth="72.0" text="УПФР:" />
-      <Label layoutX="24.0" layoutY="220.0" prefHeight="17.0" prefWidth="72.0" text="Фамилия:" />
-      <Label layoutX="330.0" layoutY="221.0" prefHeight="17.0" prefWidth="72.0" text="Инициалы" />
-      <Label layoutX="430.0" layoutY="221.0" prefHeight="17.0" prefWidth="34.0" text="Имя:" />
-      <Label layoutX="494.0" layoutY="221.0" prefHeight="17.0" prefWidth="55.0" text="Отчество:" />
-      <Label layoutX="24.0" layoutY="374.0" prefHeight="25.0" prefWidth="72.0" text="Статус:" />
-      <Label fx:id="fileNameView" layoutX="150.0" layoutY="47.0" prefHeight="17.0" prefWidth="351.0" />
-      <Label fx:id="showFileSavePath" layoutX="155.0" layoutY="84.0" prefHeight="17.0" prefWidth="351.0" />
-      <Label fx:id="invalidDetails" alignment="CENTER" layoutX="18.0" layoutY="291.0" prefHeight="31.0" prefWidth="563.0" textAlignment="CENTER">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label fx:id="statusBarInfo" layoutX="74.0" layoutY="374.0" prefHeight="25.0" prefWidth="514.0" textAlignment="CENTER" />
+      <Label layoutX="24.0" layoutY="51.0" prefHeight="17.0" prefWidth="72.0" text="Запрос:" />
+      <Label layoutX="24.0" layoutY="89.0" prefHeight="17.0" prefWidth="72.0" text="ОПФР:" />
+      <Label layoutX="24.0" layoutY="128.0" prefHeight="17.0" prefWidth="72.0" text="УПФР:" />
+      <Label layoutX="24.0" layoutY="170.0" prefHeight="17.0" prefWidth="72.0" text="Фамилия:" />
+      <Label layoutX="330.0" layoutY="171.0" prefHeight="17.0" prefWidth="72.0" text="Инициалы" />
+      <Label layoutX="430.0" layoutY="171.0" prefHeight="17.0" prefWidth="34.0" text="Имя:" />
+      <Label layoutX="494.0" layoutY="171.0" prefHeight="17.0" prefWidth="55.0" text="Отчество:" />
+      <Label layoutX="24.0" layoutY="301.0" prefHeight="25.0" prefWidth="72.0" text="Статус:" />
+      <Label fx:id="statusBarInfo" layoutX="74.0" layoutY="301.0" prefHeight="25.0" prefWidth="514.0" textAlignment="CENTER" />
    </children>
 </AnchorPane>

@@ -9,7 +9,8 @@ package com.mycompany.requestconverter.exceptions;
  * @author 041AlikinOS
  */
 public class DaoException extends RuntimeException {
+    
       public DaoException(Throwable throwable) {
-        super(throwable);
+        throwable.getMessage();
     }
 }

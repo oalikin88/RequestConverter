@@ -76,7 +76,7 @@ public class ClientDAO {
     }
     
     public List<DataHistory> getLastChangeFromSpr() throws ParseException {
-        try ( var connection = DBConnection.getInstance().getConnection();  var preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_SPR)) {
+        try ( var connection = DBConnection.getInstance().getConnection();  var preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_SPR)) {          
             var resultSet = preparedStatement.executeQuery();
             List<DataHistory> sprs = new ArrayList<>();
             while (resultSet.next()) {
@@ -87,7 +87,8 @@ public class ClientDAO {
             throwable.printStackTrace();
             throw new DaoException(throwable);
         }
-    }
+
+    } 
     
      public List<DataHistory> getLastChangeFromRequest() throws ParseException {
         try ( var connection = DBConnection.getInstance().getConnection();  var preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_REQUEST)) {

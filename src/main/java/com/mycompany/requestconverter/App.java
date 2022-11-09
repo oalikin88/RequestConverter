@@ -27,7 +27,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("primary"), 600, 400);
+        scene = new Scene(loadFXML("primary"), 600, 325);
         stage.getIcons().add(new Image("icons/icon.png"));
         stage.setTitle("Конвертер запросов ПФР");
         stage.setScene(scene);
