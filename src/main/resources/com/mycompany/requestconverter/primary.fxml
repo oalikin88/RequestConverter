@@ -26,13 +26,14 @@
           <Menu fx:id="menuFile" mnemonicParsing="false" text="Файл">
             <items>
               <MenuItem fx:id="getUpdate" mnemonicParsing="false" onAction="#actionGetUpdate" text="Получить обновление БД" />
+                  <MenuItem mnemonicParsing="false" onAction="#properties" text="Настройки" />
                   <MenuItem fx:id="menuCloseButton" mnemonicParsing="false" text="Закрыть" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Справка">
             <items>
               <MenuItem mnemonicParsing="false" onAction="#instruction" text="Инструкция" />
-                  <MenuItem fx:id="about" mnemonicParsing="false" text="About" />
+                  <MenuItem mnemonicParsing="false" onAction="#actionAbout" text="About" />
             </items>
           </Menu>
         </menus>

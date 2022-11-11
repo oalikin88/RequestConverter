@@ -6,6 +6,7 @@ package com.mycompany.requestconverter.data;
 
 import com.mycompany.requestconverter.connection.DBConnection;
 import com.mycompany.requestconverter.exceptions.DaoException;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -26,7 +27,7 @@ public class ClientDAO {
     private static final String FIND_ALL_SPR = "SELECT id, subject, opfr, upfr, name FROM spr";
     private static final String FIND_ALL_REQUEST = "SELECT id, name, short_name FROM request";
     
-    public List<Record> findAllRecords() {
+    public List<Record> findAllRecords() throws IOException {
         try ( var connection = DBConnection.getInstance().getConnection();  var preparedStatement = connection.prepareStatement(FIND_ALL_SPR)) {
             var resultSet = preparedStatement.executeQuery();
             List<Record> records = new ArrayList<>();
@@ -41,7 +42,7 @@ public class ClientDAO {
     }
     
     
-      public List<Request> findAllRequests() {
+      public List<Request> findAllRequests() throws IOException {
         try ( var connection = DBConnection.getInstance().getConnection();  var preparedStatement = connection.prepareStatement(FIND_ALL_REQUEST)) {
             var resultSet = preparedStatement.executeQuery();
             List<Request> requests = new ArrayList<>();
@@ -75,7 +76,7 @@ public class ClientDAO {
         return request;       
     }
     
-    public List<DataHistory> getLastChangeFromSpr() throws ParseException {
+    public List<DataHistory> getLastChangeFromSpr() throws ParseException, IOException {
         try ( var connection = DBConnection.getInstance().getConnection();  var preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_SPR)) {          
             var resultSet = preparedStatement.executeQuery();
             List<DataHistory> sprs = new ArrayList<>();
@@ -90,7 +91,7 @@ public class ClientDAO {
 
     } 
     
-     public List<DataHistory> getLastChangeFromRequest() throws ParseException {
+     public List<DataHistory> getLastChangeFromRequest() throws ParseException, IOException {
         try ( var connection = DBConnection.getInstance().getConnection();  var preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_REQUEST)) {
             var resultSet = preparedStatement.executeQuery();
             List<DataHistory> requests = new ArrayList<>();
