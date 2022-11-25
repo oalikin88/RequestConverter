@@ -14,11 +14,13 @@ import com.mycompany.requestconverter.service.RequestFormirovationService;
 import com.mycompany.requestconverter.service.ZipFileService;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -150,26 +152,28 @@ public class PrimaryController {
     private boolean surnameNotNull;
     private boolean firstNameNotNull;
     private boolean fatherNameNotNull;
-    private boolean connect;
+    private Settings settings;
 
     @FXML
-    void initialize() throws IOException  {
-
-        list = Content.getContent();
-        requestList = Content.getRequests();
+    void initialize() throws IOException, URISyntaxException  {
+        Content content = new Content();
+        list = content.getContent();
+        requestList = content.getRequests();
         Task task = new Task() {
             @Override
             protected Void call() throws Exception {
-                DBConnection dBConnection = new DBConnection();
+                
+                
+                System.out.println("Подключение к базе данных");
                 statusBarInfo.setText("Попытка подключения к базе данных");
-                if (dBConnection.getConnection() != null) {
-                    connect = true;
+                DBConnection dBConnection = new DBConnection();
+                try (Connection connection = dBConnection.getConnection()) {
                     ClientDAO sprHistoryClient = new ClientDAO();
                     ClientDAO requestHistoryClient = new ClientDAO();
                     sprs = sprHistoryClient.getLastChangeFromSpr();
                     requests = requestHistoryClient.getLastChangeFromRequest();
-                    List<String> sprHistoryStrings = Content.getSprHistoryContent();
-                    List<String> requestHistoryStrings = Content.getRequestHistoryContent();
+                    List<String> sprHistoryStrings = content.getSprHistoryContent();
+                    List<String> requestHistoryStrings = content.getRequestHistoryContent();
                     ConvertList convertSprList = new ConvertList();
                     ConvertList convertRequestList = new ConvertList();
                     List<DataHistory> sprHistory = convertSprList.getDataHistory(sprHistoryStrings);
@@ -198,8 +202,8 @@ public class PrimaryController {
                         Platform.runLater(() -> statusBarInfo.setText("Готов к работе"));
                     }
 
-                } else {
-                    Platform.runLater(() -> statusBarInfo.setText("Отсутствует подключение к базе данных"));
+                }  catch(SQLException e) {
+                    e.printStackTrace();
                 }
                 return null;
             }
@@ -295,6 +299,17 @@ public class PrimaryController {
    
     @FXML
     void properties(ActionEvent event) {
+       
+        settings = new Settings();
+        Map<String, String> mapSettings = null;
+        try {
+            mapSettings = settings.prepareSettings();
+        } catch (IOException ex) {
+            Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        settings.getSettings(mapSettings);
         Dialog<ButtonType> dialog = new Dialog();
         DialogPane dialogPane = dialog.getDialogPane();
         dialog.setTitle("Настройки");
@@ -311,11 +326,11 @@ public class PrimaryController {
         TextField fieldUsername = new TextField();
         Label labelPassword = new Label("Пароль");
         TextField fieldPassword = new TextField();
-        fieldUrl.setText(DBConnection.getURL());
-        fieldDataBaseName.setText(DBConnection.getDB_NAME());
-        fieldUsername.setText(DBConnection.getUSER());
-        fieldPassword.setText(DBConnection.getPASSWORD());
-        fieldPort.setText(DBConnection.getPORT());
+        fieldUrl.setText(settings.getUrl());
+        fieldDataBaseName.setText(settings.getDbName());
+        fieldUsername.setText(settings.getUsername());
+        fieldPassword.setText(settings.getPassword());
+        fieldPort.setText(settings.getPort());
         StackPane stackPane1 = new StackPane();
         StackPane stackPane2 = new StackPane();
         StackPane stackPane3 = new StackPane();
@@ -362,12 +377,14 @@ public class PrimaryController {
             newSetting.setUrl(fieldUrl.getText());
             newSetting.setUsername(fieldUsername.getText());
             newSetting.setPassword(fieldPassword.getText());
-            Settings.changeSettings(newSetting);
-            Settings.saveSettings();
+            Map<String, String> changeSettingsMap = settings.changeSettings(mapSettings, newSetting);
+            newSetting.saveSettings(changeSettingsMap);
             Platform.runLater(() -> {
                 try {
                     initialize();
                 } catch (IOException ex) {
+                    Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (URISyntaxException ex) {
                     Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });
@@ -432,18 +449,17 @@ public class PrimaryController {
     }
 
     @FXML
-    void actionGetUpdate(ActionEvent event) throws IOException {
-
+    void actionGetUpdate(ActionEvent event) throws IOException, URISyntaxException, ClassNotFoundException, SQLException {
+        Content content = new Content();
         if (compareDataHistoryList1 == -1) {
-            Content.eraseSprData();
-            Content.eraseSprHistory();
+            content.eraseSprData();
+            content.eraseSprHistory();
             ClientDAO client = new ClientDAO();
             recordList = client.findAllRecords();
-            Content.writeSprData(recordList);
-            Content content = new Content();
+            content.writeSprData(recordList);
             content.writeSprHistory(sprs);
             Platform.runLater(() -> statusBarInfo.setText("База данных успешно обновлена"));
-            list = Content.getContent();
+            list = content.getContent();
             array = ConvertList.listToTwoArray(list);
             records = CustomListManipulation.getRecords(array);
             opfrList = CustomListManipulation.getOpfr(records);
@@ -461,15 +477,14 @@ public class PrimaryController {
         }
 
         if (compareDataHistoryList2 == -1) {
-            Content.eraseRequestData();
-            Content.eraseRequestHistory();
+            content.eraseRequestData();
+            content.eraseRequestHistory();
             ClientDAO client = new ClientDAO();
             requestsList = client.findAllRequests();
-            Content.writeRequestData(requestsList);
-            Content content = new Content();
+            content.writeRequestData(requestsList);
             content.writeRequestHistory(requests);
             Platform.runLater(() -> statusBarInfo.setText("База данных успешно обновлена"));
-            requestList = Content.getRequests();
+            requestList = content.getRequests();
             rList = CustomListManipulation.getRequestList(requestList);
             requestsObserverableList = FXCollections.observableArrayList(rList);
             requestFile.setItems(requestsObserverableList);
@@ -491,7 +506,7 @@ public class PrimaryController {
         stage.setTitle("Инструкция по работе с приложением \"Конвертор запросов ПФР\"");
         WebView webView = new WebView();
         WebEngine webEngine = webView.getEngine();
-        webEngine.load(getClass().getResource("/com/mycompany/requestconverter/help.html").toString());
+        webEngine.load(getClass().getResource("/com/mycompany/requestconverter/html/help.html").toExternalForm());
         BorderPane borderPane = new BorderPane(webView);
         webView.setPrefSize(960.0, 600.0);
         Scene scene = new Scene(borderPane, 960, 600);

@@ -4,15 +4,18 @@
  */
 package com.mycompany.requestconverter.service;
 
+import com.mycompany.requestconverter.App;
 import com.mycompany.requestconverter.data.DataHistory;
 import com.mycompany.requestconverter.data.Record;
 import com.mycompany.requestconverter.data.Request;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -27,30 +30,40 @@ import java.util.logging.Logger;
  */
 public class Content {
 
-    private static final String pathToSpr = "src/main/java/com/mycompany/requestconverter/data/spr.csv";
-    private static final String pathToRequest = "src/main/java/com/mycompany/requestconverter/data/request.csv";
-    private static final String pathToSprHistory = "src/main/java/com/mycompany/requestconverter/data/spr_history.csv";
-    private static final String pathToRequestHistory = "src/main/java/com/mycompany/requestconverter/data/request_history.csv";
+    private static String pathToSpr = "com/mycompany/requestconverter/service/spr.csv";
+    private static String pathToRequest = "com/mycompany/requestconverter/service/request.csv";
+    private static String pathToSprHistory = "com/mycompany/requestconverter/service/spr_history.csv";
+    private static String pathToRequestHistory = "com/mycompany/requestconverter/service/request_history.csv";
 
     DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     Date currentDate;
 
-    public static List<String> getContent() throws IOException {
+    public static Path copyToTempFile(URL url, String suffix) throws IOException {
+        // 'suffix' will default to ".tmp" if null
+        Path tempFile = Files.createTempFile(null, suffix);
+        try ( InputStream in = url.openStream();  OutputStream out = Files.newOutputStream(tempFile)) {
+            in.transferTo(out); // 'transferTo' method added in Java 9
+        }
+        return tempFile;
+    }
+
+    public List<String> getContent() throws IOException, URISyntaxException {
+
         try {
-            Path getPath = Paths.get(pathToSpr);
+           
+            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToSpr), ".tmp");
             List<String> list = Files.readAllLines(getPath);
+
             return list;
         } catch (IOException e) {
             e.getStackTrace();
             throw new IOException("Отсутствует файл spr.csv");
-
         }
-
     }
 
-    public static List<String> getRequests() throws IOException {
+    public List<String> getRequests() throws IOException, URISyntaxException {
         try {
-            Path getPath = Paths.get(pathToRequest);
+            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToRequest), ".tmp");
             List<String> list = Files.readAllLines(getPath);
             return list;
         } catch (IOException e) {
@@ -59,9 +72,9 @@ public class Content {
         }
     }
 
-    public static List<String> getSprHistoryContent() throws IOException {
+    public List<String> getSprHistoryContent() throws IOException, URISyntaxException {
         try {
-            Path getPath = Paths.get(pathToSprHistory);
+            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToSprHistory), ".tmp");
             List<String> list = Files.readAllLines(getPath);
             return list;
         } catch (IOException e) {
@@ -71,9 +84,9 @@ public class Content {
 
     }
 
-    public static List<String> getRequestHistoryContent() throws IOException {
+    public List<String> getRequestHistoryContent() throws IOException, URISyntaxException {
         try {
-            Path getPath = Paths.get(pathToRequestHistory);
+           Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToRequestHistory), ".tmp");
             List<String> list = Files.readAllLines(getPath);
             return list;
         } catch (IOException e) {
@@ -83,9 +96,9 @@ public class Content {
 
     }
 
-    public static void eraseSprData() throws IOException {
+    public void eraseSprData() throws IOException, URISyntaxException {
         try {
-            Path getPath = Paths.get(pathToSpr);
+            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToSpr), ".tmp");
             Files.newBufferedWriter(getPath, StandardOpenOption.TRUNCATE_EXISTING);
             System.out.println(getPath + " очищен.");
         } catch (IOException e) {
@@ -94,9 +107,9 @@ public class Content {
         }
     }
 
-    public static void eraseRequestData() throws IOException {
+    public void eraseRequestData() throws IOException, URISyntaxException {
         try {
-            Path getPath = Paths.get(pathToRequestHistory);
+            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToRequest), ".tmp");
             Files.newBufferedWriter(getPath, StandardOpenOption.TRUNCATE_EXISTING);
             System.out.println(getPath + " очищен.");
         } catch (IOException e) {
@@ -105,10 +118,11 @@ public class Content {
         }
     }
 
-    public static void writeSprData(List<Record> inputList) {
+    public void writeSprData(List<Record> inputList) throws URISyntaxException {
         FileWriter writer = null;
         try {
-            writer = new FileWriter(pathToSpr, Charset.forName("UTF-8"));
+            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToSpr), ".tmp");
+            writer = new FileWriter(getPath.toFile());
             for (Record rec : inputList) {
                 String subject = rec.getSubject();
                 String opfr = rec.getOpfr();
@@ -122,19 +136,19 @@ public class Content {
             writer.close();
             System.out.println("Запись в файл spr.csv прошла успешно.");
         } catch (IOException ex) {
-            Logger.getLogger(Content.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 writer.close();
             } catch (IOException ex) {
-                Logger.getLogger(Content.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
-    public static void eraseSprHistory() throws IOException {
+    public void eraseSprHistory() throws IOException, URISyntaxException {
         try {
-            Path getPath = Paths.get(pathToSprHistory);
+            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToSprHistory), ".tmp");
             Files.newBufferedWriter(getPath, StandardOpenOption.TRUNCATE_EXISTING);
             System.out.println(getPath + " очищен.");
         } catch (IOException e) {
@@ -146,7 +160,8 @@ public class Content {
     public void writeSprHistory(List<DataHistory> inputList) throws IOException {
         FileWriter writer = null;
         try {
-            writer = new FileWriter(pathToSprHistory, Charset.forName("UTF-8"));
+            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToSprHistory), ".tmp");
+            writer = new FileWriter(getPath.toFile());
             for (DataHistory data : inputList) {
                 Date date = data.getDate();
                 String action = data.getAction();
@@ -170,10 +185,11 @@ public class Content {
         }
     }
 
-    public void writeRequestHistory(List<DataHistory> inputList) throws IOException {
+    public void writeRequestHistory(List<DataHistory> inputList) throws IOException, URISyntaxException {
         FileWriter writer = null;
         try {
-            writer = new FileWriter(pathToRequestHistory, Charset.forName("UTF-8"));
+            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToRequestHistory), ".tmp");
+            writer = new FileWriter(getPath.toFile());
             for (DataHistory data : inputList) {
                 Date date = data.getDate();
                 String action = data.getAction();
@@ -197,9 +213,9 @@ public class Content {
         }
     }
 
-    public static void eraseRequestHistory() throws IOException {
+    public void eraseRequestHistory() throws IOException, URISyntaxException {
         try {
-            Path getPath = Paths.get(pathToRequestHistory);
+            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToRequestHistory), ".tmp");
             Files.newBufferedWriter(getPath, StandardOpenOption.TRUNCATE_EXISTING);
             System.out.println(getPath + " очищен.");
         } catch (IOException e) {
@@ -208,19 +224,19 @@ public class Content {
         }
     }
 
-    public static void writeRequestData(List<Request> inputList) {
+    public void writeRequestData(List<Request> inputList) throws URISyntaxException {
         FileWriter writer = null;
         try {
-            writer = new FileWriter(pathToRequest, Charset.forName("UTF-8"));
+            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToRequest), ".tmp");
+            writer = new FileWriter(getPath.toFile());
             for (Request rec : inputList) {
                 String name = rec.getName();
                 String shortName = rec.getShortName();
                 writer.write(name + ";" + shortName);
-            
 
-            if (inputList.iterator().hasNext()) {
-                writer.write("\n");
-            }
+                if (inputList.iterator().hasNext()) {
+                    writer.write("\n");
+                }
             }
             writer.close();
             System.out.println("Запись в файл request.csv прошла успешно.");

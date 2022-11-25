@@ -7,8 +7,11 @@ package com.mycompany.requestconverter.data;
 import com.mycompany.requestconverter.connection.DBConnection;
 import com.mycompany.requestconverter.exceptions.DaoException;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,9 +29,13 @@ public class ClientDAO {
     
     private static final String FIND_ALL_SPR = "SELECT id, subject, opfr, upfr, name FROM spr";
     private static final String FIND_ALL_REQUEST = "SELECT id, name, short_name FROM request";
+   
     
-    public List<Record> findAllRecords() throws IOException {
-        try ( var connection = DBConnection.getInstance().getConnection();  var preparedStatement = connection.prepareStatement(FIND_ALL_SPR)) {
+    
+    
+    public List<Record> findAllRecords() throws IOException, URISyntaxException, ClassNotFoundException, SQLException {
+        DBConnection dBConnection = new DBConnection();
+         try ( var connection = dBConnection.getConnection();  var preparedStatement = connection.prepareStatement(FIND_ALL_SPR)) {
             var resultSet = preparedStatement.executeQuery();
             List<Record> records = new ArrayList<>();
             while (resultSet.next()) {
@@ -42,8 +49,9 @@ public class ClientDAO {
     }
     
     
-      public List<Request> findAllRequests() throws IOException {
-        try ( var connection = DBConnection.getInstance().getConnection();  var preparedStatement = connection.prepareStatement(FIND_ALL_REQUEST)) {
+      public List<Request> findAllRequests() throws IOException, URISyntaxException, ClassNotFoundException, SQLException {
+          DBConnection dBConnection = new DBConnection();
+        try ( var connection = dBConnection.getConnection();  var preparedStatement = connection.prepareStatement(FIND_ALL_REQUEST)) {
             var resultSet = preparedStatement.executeQuery();
             List<Request> requests = new ArrayList<>();
             while (resultSet.next()) {
@@ -53,7 +61,7 @@ public class ClientDAO {
         } catch (SQLException throwable) {
             throwable.printStackTrace();
             throw new DaoException(throwable);
-        }
+        } 
     }
       
       
@@ -76,23 +84,26 @@ public class ClientDAO {
         return request;       
     }
     
-    public List<DataHistory> getLastChangeFromSpr() throws ParseException, IOException {
-        try ( var connection = DBConnection.getInstance().getConnection();  var preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_SPR)) {          
+    public List<DataHistory> getLastChangeFromSpr() throws ParseException, IOException, URISyntaxException, ClassNotFoundException, SQLException {
+       DBConnection dBConnection = new DBConnection();
+        try ( var connection = dBConnection.getConnection();
+                var preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_SPR)) {             
             var resultSet = preparedStatement.executeQuery();
             List<DataHistory> sprs = new ArrayList<>();
             while (resultSet.next()) {
                 sprs.add(buildDataHistory(resultSet));
             }
             return sprs;
-        } catch (SQLException throwable) {
+        } catch (Exception throwable) {
             throwable.printStackTrace();
             throw new DaoException(throwable);
-        }
+        } 
 
     } 
     
-     public List<DataHistory> getLastChangeFromRequest() throws ParseException, IOException {
-        try ( var connection = DBConnection.getInstance().getConnection();  var preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_REQUEST)) {
+     public List<DataHistory> getLastChangeFromRequest() throws ParseException, IOException, URISyntaxException, ClassNotFoundException, SQLException {
+         DBConnection dBConnection = new DBConnection();
+        try ( var connection = dBConnection.getConnection();  var preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_REQUEST)) {
             var resultSet = preparedStatement.executeQuery();
             List<DataHistory> requests = new ArrayList<>();
             while (resultSet.next()) {
@@ -102,7 +113,7 @@ public class ClientDAO {
         } catch (SQLException throwable) {
             throwable.printStackTrace();
             throw new DaoException(throwable);
-        }
+        } 
     }
     
     

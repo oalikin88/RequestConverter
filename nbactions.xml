@@ -6,52 +6,52 @@
                 <packaging>jar</packaging>
             </packagings>
             <goals>
-                <goal>clean</goal>
-                <goal>javafx:run</goal>
-            </goals>
-        </action>
-        <action>
-            <actionName>debug</actionName>
-            <goals>
-                <goal>clean</goal>
-                <goal>javafx:run@ide-debug</goal>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:3.0.0:exec</goal>
             </goals>
             <properties>
-                <jpda.listen>true</jpda.listen>
+                <exec.vmArgs>--module-path "C:\Java\javafx-sdk-19\lib" --add-modules javafx.controls,javafx.fxml,javafx.web</exec.vmArgs>
+                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
+                <exec.appArgs></exec.appArgs>
+                <exec.mainClass>com.mycompany.requestconverter.Main</exec.mainClass>
+                <exec.executable>java</exec.executable>
             </properties>
         </action>
         <action>
-            <actionName>profile</actionName>
-            <goals>
-                <goal>clean</goal>
-                <goal>javafx:run@ide-profile</goal>
-            </goals>
-        </action>
-        <action>
-            <actionName>CUSTOM-jlink</actionName>
-            <displayName>jlink</displayName>
-            <goals>
-                <goal>clean</goal>
-                <!-- compile not needed with javafx-maven-plugin v0.0.5 -->
-                <goal>compile</goal>
-                <goal>javafx:jlink</goal>
-            </goals>
-        </action>
-        <action>
-            <actionName>run.single.main</actionName>
+            <actionName>debug</actionName>
             <packagings>
-                <packaging>*</packaging>
+                <packaging>jar</packaging>
             </packagings>
             <goals>
                 <goal>process-classes</goal>
                 <goal>org.codehaus.mojo:exec-maven-plugin:3.0.0:exec</goal>
             </goals>
             <properties>
-                <exec.vmArgs>--add-modules javafx.web</exec.vmArgs>
+                <exec.vmArgs>--module-path "C:\Java\javafx-sdk-19\lib" --add-modules javafx.controls,javafx.fxml,javafx.web -agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
+                <exec.appArgs></exec.appArgs>
+                <exec.mainClass>com.mycompany.requestconverter.Main</exec.mainClass>
                 <exec.executable>java</exec.executable>
-                <exec.mainClass>${packageClassName}</exec.mainClass>
-                <exec.classpathScope>${classPathScope}</exec.classpathScope>
+                <jpda.listen>true</jpda.listen>
             </properties>
         </action>
+        <action>
+            <actionName>profile</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:3.0.0:exec</goal>
+            </goals>
+            <properties>
+                <exec.vmArgs>--module-path "C:\Java\javafx-sdk-19\lib" --add-modules javafx.controls,javafx.fxml,javafx.web</exec.vmArgs>
+                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
+                <exec.mainClass>com.mycompany.requestconverter.Main</exec.mainClass>
+                <exec.executable>java</exec.executable>
+                <exec.appArgs></exec.appArgs>
+            </properties>
+        </action>
+        
+        
     </actions>

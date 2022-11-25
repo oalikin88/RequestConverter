@@ -27,8 +27,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("primary"), 600, 325);
-        stage.getIcons().add(new Image("icons/icon.png"));
+        scene = new Scene(loadFXML("fxml/primary"), 600, 325);
+        stage.getIcons().add(new Image(getClass().getResource("/com/mycompany/requestconverter/icons/icon.png").toExternalForm()));
         stage.setTitle("Конвертер запросов ПФР");
         stage.setScene(scene);
         stage.setResizable(false);
@@ -48,7 +48,9 @@ public class App extends Application {
         return fxmlLoader.load();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
+       
+    
         launch();
     }
 

@@ -42,6 +42,8 @@ public class ZipFileService {
                 zos.write(buffer, 0, len);
             }
             zos.closeEntry();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
