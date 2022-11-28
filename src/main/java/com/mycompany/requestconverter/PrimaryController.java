@@ -153,10 +153,10 @@ public class PrimaryController {
     private boolean firstNameNotNull;
     private boolean fatherNameNotNull;
     private Settings settings;
-
+    private Content content;
     @FXML
     void initialize() throws IOException, URISyntaxException  {
-        Content content = new Content();
+        content = new Content();
         list = content.getContent();
         requestList = content.getRequests();
         Task task = new Task() {
@@ -215,8 +215,7 @@ public class PrimaryController {
         };
 
        Platform.runLater(task);
-        
-        
+           
         // Обработка requestList            
         rList = CustomListManipulation.getRequestList(requestList);
         requestsObserverableList = FXCollections.observableArrayList(rList);
@@ -233,19 +232,21 @@ public class PrimaryController {
         oList = FXCollections.observableArrayList(opfrList.stream().map(e -> e.getName()).collect(Collectors.toList()));
         opfr.setItems(oList);
         opfr.setValue(oList.get(0));
-        String element = opfr.getValue();
+        String element = opfr.getItems().get(0);
         // получение списка УПФР из общего массива
         List<Record> upfrRecords = CustomListManipulation.getUpfrList(records, element);
         ObservableList<String> upfrList = FXCollections.observableArrayList(upfrRecords.stream().map(e -> e.getName()).collect(Collectors.toList()));
         upfr.setItems(upfrList);
         upfr.setValue(upfrList.get(0));
         opfr.setOnAction(event -> {
-            String element2 = opfr.getValue();
+            String element2 = opfr.getItems().get(0);
             // получение списка упфр при смене элемента в choicebox ОПФР
             List<Record> target = CustomListManipulation.getUpfrList(records, element2);
             ObservableList<String> upfrList2 = FXCollections.observableArrayList(target.stream().map(e -> e.getName()).collect(Collectors.toList()));
             upfr.setItems(upfrList2);
-            upfr.setValue(upfrList2.get(0));
+            if(upfrList2 != null) {
+                upfr.setValue(upfrList2.get(0));
+            }
         }
         );
 
@@ -450,10 +451,9 @@ public class PrimaryController {
 
     @FXML
     void actionGetUpdate(ActionEvent event) throws IOException, URISyntaxException, ClassNotFoundException, SQLException {
-        Content content = new Content();
+       
         if (compareDataHistoryList1 == -1) {
-            content.eraseSprData();
-            content.eraseSprHistory();
+            
             ClientDAO client = new ClientDAO();
             recordList = client.findAllRecords();
             content.writeSprData(recordList);
@@ -477,8 +477,7 @@ public class PrimaryController {
         }
 
         if (compareDataHistoryList2 == -1) {
-            content.eraseRequestData();
-            content.eraseRequestHistory();
+            
             ClientDAO client = new ClientDAO();
             requestsList = client.findAllRequests();
             content.writeRequestData(requestsList);
