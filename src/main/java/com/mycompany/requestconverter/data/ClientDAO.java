@@ -31,9 +31,10 @@ public class ClientDAO {
     
     
     
-    public List<Record> findAllRecords() throws IOException, URISyntaxException, ClassNotFoundException, SQLException {
+    public List<Record> findAllRecords(String sprType) throws IOException, URISyntaxException, ClassNotFoundException, SQLException {
+        String request = FIND_ALL_SPR.replace("spr", sprType);
         DBConnection dBConnection = new DBConnection();
-         try ( var connection = dBConnection.getConnection();  var preparedStatement = connection.prepareStatement(FIND_ALL_SPR)) {
+         try ( var connection = dBConnection.getConnection();  var preparedStatement = connection.prepareStatement(request)) {
             var resultSet = preparedStatement.executeQuery();
             List<Record> records = new ArrayList<>();
             while (resultSet.next()) {
@@ -82,10 +83,11 @@ public class ClientDAO {
         return request;       
     }
     
-    public List<DataHistory> getLastChangeFromSpr() throws ParseException, IOException, URISyntaxException, ClassNotFoundException, SQLException {
+    public List<DataHistory> getLastChangeFromSpr(String sprType) throws ParseException, IOException, URISyntaxException, ClassNotFoundException, SQLException {
+        String request = GET_LAST_CHANGE_FROM_SPR.replace("spr", sprType);
        DBConnection dBConnection = new DBConnection();
         try ( var connection = dBConnection.getConnection();
-                var preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_SPR)) {             
+                var preparedStatement = connection.prepareStatement(request)) {             
             var resultSet = preparedStatement.executeQuery();
             List<DataHistory> sprs = new ArrayList<>();
             while (resultSet.next()) {

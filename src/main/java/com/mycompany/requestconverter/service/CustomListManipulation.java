@@ -34,10 +34,10 @@ public class CustomListManipulation {
             Record record = new Record();
             for (int j = 0; j < 4; j++) {
                 
-                record.setSubject(array[i][0]);
-                record.setOpfr(array[i][1]);
-                record.setUpfr(array[i][2]);
-                record.setName(array[i][3]);
+                record.setSubject(array[i][0].trim());
+                record.setOpfr(array[i][1].trim());
+                record.setUpfr(array[i][2].trim());
+                record.setName(array[i][3].trim());
                 
             }
             records.add(record);

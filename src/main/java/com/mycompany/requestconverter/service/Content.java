@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -28,7 +29,7 @@ import java.util.logging.Logger;
  */
 public class Content {
 
-    private static String pathToSpr = System.getProperty("user.dir") + "/data/spr.csv";
+    public static String pathToSpr = System.getProperty("user.dir") + "/data/spr.csv";
     private static String pathToRequest = System.getProperty("user.dir") + "/data/request.csv";
     private static String pathToSprHistory = System.getProperty("user.dir") + "/data/spr_history.csv";
     private static String pathToRequestHistory = System.getProperty("user.dir") + "/data/request_history.csv";
@@ -36,20 +37,20 @@ public class Content {
     DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     Date currentDate;
 
-    public List<String> getContent() throws IOException, URISyntaxException {
+    public List<String> getContentSpr(String target) throws IOException, URISyntaxException {
+        String request = pathToSpr.replace("spr", target);
         File file;
         try {
-            Path getPath = Paths.get(pathToSpr);
+            Path getPath = Paths.get(request);
             file = new File(getPath.toUri());
-
             List<String> list = Files.readAllLines(file.toPath());
             return list;
         } catch (IOException e) {
             e.getStackTrace();
             throw new IOException("Отсутствует файл spr.csv");
         }
-
     }
+    
 
     public List<String> getRequests() throws IOException, URISyntaxException {
         File file;
@@ -64,12 +65,12 @@ public class Content {
         }
     }
 
-    public List<String> getSprHistoryContent() throws IOException, URISyntaxException {
-
+    public List<String> getSprHistoryContent(String target) throws IOException, URISyntaxException {
+        String request = pathToSprHistory.replace("spr", target);
         File file;
 
         try {
-            Path getPath = Paths.get(pathToSprHistory);
+            Path getPath = Paths.get(request);
             file = new File(getPath.toUri());
             List<String> list = Files.readAllLines(file.toPath());
             return list;
@@ -94,39 +95,14 @@ public class Content {
 
     }
 
-//    public void eraseSprData() throws IOException, URISyntaxException {
-//
-//        try {
-//
-//            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToSpr), ".tmp");
-//            Files.newBufferedWriter(getPath, StandardOpenOption.TRUNCATE_EXISTING);
-//            System.out.println(getPath + " очищен.");
-//
-//        } catch (IOException e) {
-//            e.getStackTrace();
-//            throw new IOException("Отсутствует файл spr.csv");
-//        }
-//
-//    }
-//
-//    public void eraseRequestData() throws IOException, URISyntaxException {
-//        try {
-//            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToRequest), ".tmp");
-//            Files.newBufferedWriter(getPath, StandardOpenOption.TRUNCATE_EXISTING);
-//            System.out.println(getPath + " очищен.");
-//        } catch (IOException e) {
-//            e.getStackTrace();
-//            throw new IOException("Отсутствует файл request_history.csv");
-//        }
-//    }
-    public void writeSprData(List<Record> inputList) throws URISyntaxException {
-
+    public void writeSprData(List<Record> inputList, String target) throws URISyntaxException {
+        String request = pathToSpr.replace("spr", target);
         File file1;
         Path getPath1;
         FileWriter writer = null;
 
         try {
-            getPath1 = Paths.get(pathToSpr);
+            getPath1 = Paths.get(request);
             file1 = new File(getPath1.toUri());
             writer = new FileWriter(file1);
             for (Record rec : inputList) {
@@ -154,24 +130,15 @@ public class Content {
         }
 
     }
-
-//    public void eraseSprHistory() throws IOException, URISyntaxException {
-//        try {
-//            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToSprHistory), ".tmp");
-//            Files.newBufferedWriter(getPath, StandardOpenOption.TRUNCATE_EXISTING);
-//            System.out.println(getPath + " очищен.");
-//        } catch (IOException e) {
-//            e.getStackTrace();
-//            throw new IOException("Отсутствует файл spr_history.csv");
-//        }
-//    }
-    public void writeSprHistory(List<DataHistory> inputList) throws IOException {
+    
+    public void writeSprHistory(List<DataHistory> inputList, String target) throws IOException {
+        String request = pathToSprHistory.replace("spr", target);
         File file1;
         Path getPath1;
         FileWriter writer = null;
 
         try {
-            getPath1 = Paths.get(pathToSprHistory);
+            getPath1 = Paths.get(request);
             file1 = new File(getPath1.toUri());
             writer = new FileWriter(file1);
             for (DataHistory data : inputList) {
@@ -232,16 +199,6 @@ public class Content {
         }
     }
 
-//    public void eraseRequestHistory() throws IOException, URISyntaxException {
-//        try {
-//            Path getPath = copyToTempFile(App.class.getClassLoader().getResource(pathToRequestHistory), ".tmp");
-//            Files.newBufferedWriter(getPath, StandardOpenOption.TRUNCATE_EXISTING);
-//            System.out.println(getPath + " очищен.");
-//        } catch (IOException e) {
-//            e.getStackTrace();
-//            throw new IOException("Отсутствует файл request_history.csv");
-//        }
-//    }
     public void writeRequestData(List<Request> inputList) throws URISyntaxException {
         File file1;
         Path getPath1;
