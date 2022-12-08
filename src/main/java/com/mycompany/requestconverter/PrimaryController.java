@@ -55,6 +55,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -266,7 +267,7 @@ public class PrimaryController {
         recordsSpr = spr.getRecordsFromLocal();
        
         opfrListSpr = CustomListManipulation.getOpfr(recordsSpr);
-        oListSpr = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).collect(Collectors.toList()));
+        oListSpr = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).sorted((o1, o2) -> o1.compareTo(o2)).collect(Collectors.toList()));
         
         sprValueList = FXCollections.observableArrayList(Spr.getSPR().values());
         sprValue.setItems(sprValueList);
@@ -372,7 +373,7 @@ public class PrimaryController {
             if (t1.contains(sprValueList.get(1))) {
                 recordsSprVd = sprVd.getRecordsFromLocal();
                 opfrListSpr = CustomListManipulation.getOpfr(recordsSprVd);
-                oListSpr = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).collect(Collectors.toList()));
+                oListSpr = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).sorted((o1, o2) -> o1.compareTo(o2)).collect(Collectors.toList()));
                 //opfr.getItems().addAll(oListSprVd);
                 opfr.setItems(oListSpr);
                 
@@ -429,11 +430,9 @@ public class PrimaryController {
                     String element2;
                     if (null != opfr.getSelectionModel().getSelectedItem()) {
                         element2 = opfr.getSelectionModel().getSelectedItem();
-
                     } else {
                         element2 = opfr.getItems().get(0);
                     }
-
                     // получение списка упфр при смене элемента в choicebox ОПФР
                     List<Record> target = CustomListManipulation.getUpfrList(recordsSpr, element2);
                     ObservableList<String> upfrList2 = null;
@@ -489,7 +488,8 @@ public class PrimaryController {
         Label labelUsername = new Label("Имя пользователя");
         TextField fieldUsername = new TextField();
         Label labelPassword = new Label("Пароль");
-        TextField fieldPassword = new TextField();
+        PasswordField fieldPassword = new PasswordField();
+       
         fieldUrl.setText(settings.getUrl());
         fieldDataBaseName.setText(settings.getDbName());
         fieldUsername.setText(settings.getUsername());
@@ -704,7 +704,7 @@ public class PrimaryController {
     @FXML
     void instruction(ActionEvent event) {
         Stage stage = new Stage();
-        stage.setTitle("Инструкция по работе с приложением \"Конвертор запросов ПФР\"");
+        stage.setTitle("Инструкция по работе с приложением \"Конвертер запросов ПФР\"");
         WebView webView = new WebView();
         WebEngine webEngine = webView.getEngine();
         webEngine.load(getClass().getResource("/com/mycompany/requestconverter/html/help.html").toExternalForm());
@@ -727,7 +727,7 @@ public class PrimaryController {
         dialog.setHeaderText(null);
         TextFlow textFlow = new TextFlow();
         VBox vBox = new VBox();
-        Text name = new Text("Конвертор запросов ПФР");
+        Text name = new Text("Конвертер запросов ПФР");
         Text author = new Text("Разработка: Аликин Олег Сергеевич");
         Text info = new Text("Отдел эксплуатации и сопровождения информационных подсистем");
         Text email = new Text("email: alikino@31.sfr.gov.ru");
