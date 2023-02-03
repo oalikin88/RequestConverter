@@ -15,7 +15,11 @@ import com.mycompany.requestconverter.service.DateCompareList;
 import com.mycompany.requestconverter.service.RequestFormirovationService;
 import com.mycompany.requestconverter.service.ZipFileService;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Connection;
@@ -562,7 +566,7 @@ public class PrimaryController {
 
     // Кнопка преобразовать
     @FXML
-    void submit(ActionEvent event) throws InterruptedException {
+    void submit(ActionEvent event) throws InterruptedException, IOException {
 
         Stage stage = new Stage();
         fileChooser = new FileChooser();
@@ -570,12 +574,33 @@ public class PrimaryController {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Все файлы", "*.*"));
         
+       
+        
         
         List<File> selectedFiles = fileChooser.showOpenMultipleDialog(stage);
         final DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Выберите директорию куда сохранить файл");
-        directoryChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
+         File cacheFile = new File("directory.txt");
+        if(cacheFile.exists()) {
+            try(InputStream inputStream = new FileInputStream(cacheFile)) {
+                byte[] bytes = new byte[(int) cacheFile.length()];
+                inputStream.read(bytes);
+                File directory = new File(new String(bytes));
+                if(directory.exists()) {
+                    directoryChooser.setInitialDirectory(directory);
+                } else {
+                 directoryChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
+                }
+            }
+        }
+       
         File selectedDirectory = directoryChooser.showDialog(stage);
+        if(selectedDirectory != null) {
+            try(OutputStream outputStream = new FileOutputStream(cacheFile)) {
+                byte[] bytes = selectedDirectory.getParent().getBytes();
+                outputStream.write(bytes);
+            }
+        }
         str = selectedDirectory.getAbsolutePath() + "\\";
         // инициализация имени
         String fName = firstName.getText();
