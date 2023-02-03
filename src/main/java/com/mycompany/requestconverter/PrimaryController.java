@@ -18,13 +18,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -174,6 +174,8 @@ public class PrimaryController {
     private String element;
     private ObservableList<String> upfrList;
     private ObservableList<String> upfrListParentElement;
+    
+   
 
     @FXML
     void initialize() throws IOException, URISyntaxException {
@@ -564,10 +566,12 @@ public class PrimaryController {
 
         Stage stage = new Stage();
         fileChooser = new FileChooser();
-        fileChooser.setTitle("Выберите файл для конвертирования");
+        fileChooser.setTitle("Выберите файлы для конвертирования");
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Все файлы", "*.*"));
-        File selectedFile = fileChooser.showOpenDialog(stage);
+        
+        
+        List<File> selectedFiles = fileChooser.showOpenMultipleDialog(stage);
         final DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Выберите директорию куда сохранить файл");
         directoryChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
@@ -615,8 +619,8 @@ public class PrimaryController {
         System.out.println(out);
 
         try {
-            Path path = Path.of(selectedFile.getAbsolutePath());
-            ZipFileService.zipSingleFile(path, out.toString());
+            
+            ZipFileService.zipMultipleFiles(selectedFiles, out.toString());
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setTitle("Сообщение");
             alert.setHeaderText(null);
@@ -717,21 +721,23 @@ public class PrimaryController {
     }
 
     @FXML
-    void actionAbout(ActionEvent event) {
+    void actionAbout(ActionEvent event) throws IOException {
         Dialog<ButtonType> dialog = new Dialog();
         DialogPane dialogPane = dialog.getDialogPane();
-
         dialog.getDialogPane().setMinHeight(250.0);
         dialog.getDialogPane().setMinWidth(500.0);
+        Properties prop = new Properties();
+        prop.load(App.class.getClassLoader().getResourceAsStream("version.properties"));
+        String ver = prop.getProperty("version");
         dialog.setTitle("О программе");
         dialog.setHeaderText(null);
         TextFlow textFlow = new TextFlow();
         VBox vBox = new VBox();
-        Text name = new Text("Конвертер запросов ПФР");
+        Text name = new Text("Конвертер запросов СФР ver." + ver);
         Text author = new Text("Разработка: Аликин Олег Сергеевич");
         Text info = new Text("Отдел эксплуатации и сопровождения информационных подсистем");
         Text email = new Text("email: alikino@31.sfr.gov.ru");
-        Text copyright = new Text("© 2022 Отделение ПФР по Белгородской области");
+        Text copyright = new Text("© 2023 Отделение СФР по Белгородской области");
         info.setWrappingWidth(450);
         textFlow.getChildren().add(vBox);
         vBox.getChildren().addAll(name, author, info, email, copyright);

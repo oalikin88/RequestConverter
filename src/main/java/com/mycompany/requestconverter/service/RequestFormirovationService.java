@@ -29,7 +29,7 @@ public class RequestFormirovationService {
         String s = "";
          for (int i = 0; i < array.length; i++) {
                 for (int j = 0; j < 4; j++) {
-                    if (array[i][j].equals(value)) {
+                    if (array[i][j].toLowerCase().trim().equals(value.toLowerCase().trim())) {
                         s += array[i][j - 3];
                         s += array[i][j - 2];
                         s += array[i][j - 1];
