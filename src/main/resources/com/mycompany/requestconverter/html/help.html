@@ -206,11 +206,21 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         </div>
         <footer class="py-3 my-4">
 
-            <p class="text-center text-light">© 2023 Отдел эксплуатации и сопровождения информационных подсистем. <br> Отделение СФР по Белгородской области</p>
+            <p class="text-center text-light">© 2008 - 
+                <script>
+                    function date_time()
+    {
+        var current_datetime = new Date();
+        var year = current_datetime.getFullYear();
+        return year;
+    }
+    document.write(date_time());
+</script>                
+                 Отдел эксплуатации и сопровождения информационных подсистем. <br> Отделение СФР по Белгородской области</p>
         </footer>
         <script src="../static/js/bootstrap.bundle.min.js" ></script>
         <script src="../static/js/bootstrap.min.js"></script> 
-
+        <script src="../static/js/jquery-3.6.0.min.js"></script>
         <script src="../static/js/popper.min.js"></script>        
 
     </body>

@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -733,7 +734,7 @@ public class PrimaryController {
     @FXML
     void instruction(ActionEvent event) {
         Stage stage = new Stage();
-        stage.setTitle("Инструкция по работе с приложением \"Конвертер запросов ПФР\"");
+        stage.setTitle("Инструкция по работе с приложением \"Конвертер запросов CФР\"");
         WebView webView = new WebView();
         WebEngine webEngine = webView.getEngine();
         webEngine.load(getClass().getResource("/com/mycompany/requestconverter/html/help.html").toExternalForm());
@@ -757,12 +758,14 @@ public class PrimaryController {
         dialog.setTitle("О программе");
         dialog.setHeaderText(null);
         TextFlow textFlow = new TextFlow();
+        LocalDateTime date = LocalDateTime.now();
+        
         VBox vBox = new VBox();
         Text name = new Text("Конвертер запросов СФР ver." + ver);
         Text author = new Text("Разработка: Аликин Олег Сергеевич");
         Text info = new Text("Отдел эксплуатации и сопровождения информационных подсистем");
-        Text email = new Text("email: alikino@31.sfr.gov.ru");
-        Text copyright = new Text("© 2023 Отделение СФР по Белгородской области");
+        Text email = new Text("email: alikino@041.pfr.gov.ru");
+        Text copyright = new Text("© 2008 - " + date.getYear() + " Отделение СФР по Белгородской области");
         info.setWrappingWidth(450);
         textFlow.getChildren().add(vBox);
         vBox.getChildren().addAll(name, author, info, email, copyright);
