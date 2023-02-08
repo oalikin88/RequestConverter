@@ -5,7 +5,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 import javafx.animation.FadeTransition;
 import javafx.scene.image.Image;
@@ -17,7 +16,6 @@ import javafx.util.Duration;
 public class App extends Application {
     
 
-
     private static Scene scene;
 
     public static Scene getScene() {
@@ -27,6 +25,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        
+        
         scene = new Scene(loadFXML("fxml/primary"), 600, 350);
         stage.getIcons().add(new Image(getClass().getResource("/com/mycompany/requestconverter/icons/icon.png").toExternalForm()));
         stage.setTitle("Конвертер запросов СФР");
@@ -49,9 +49,8 @@ public class App extends Application {
     }
 
     public static void main(String[] args) throws ClassNotFoundException {
-       
-    
-        launch();
+       launch();
+
     }
 
 }

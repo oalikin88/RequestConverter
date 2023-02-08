@@ -237,7 +237,7 @@ public class PrimaryController {
                                 new ButtonType("Нет", ButtonBar.ButtonData.CANCEL_CLOSE));
                         Optional<ButtonType> result = dialog.showAndWait();
                         if (result.isPresent()) {
-                            if (result.orElseThrow().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+                            if (result.orElseThrow(() -> new Exception()).getButtonData() == ButtonBar.ButtonData.OK_DONE) {
                                 getUpdate.fire();
                             }
                         }
@@ -468,7 +468,7 @@ public class PrimaryController {
     }
 
     @FXML
-    void properties(ActionEvent event) {
+    void properties(ActionEvent event) throws Exception {
 
         settings = new Settings();
         Map<String, String> mapSettings = null;
@@ -541,7 +541,7 @@ public class PrimaryController {
         Optional<ButtonType> result = dialog.showAndWait();
 
         if (result.isPresent()) {
-            if (result.orElseThrow().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+            if (result.orElseThrow(() -> new Exception()).getButtonData() == ButtonBar.ButtonData.OK_DONE) {
                 Settings newSetting = new Settings();
                 newSetting.setDbName(fieldDataBaseName.getText());
                 newSetting.setPort(fieldPort.getText());
@@ -560,7 +560,7 @@ public class PrimaryController {
                     }
                 });
             }
-        } else if (result.orElseThrow().getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
+        } else if (result.orElseThrow(() -> new Exception()).getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
         }
 
     }
@@ -741,6 +741,7 @@ public class PrimaryController {
         BorderPane borderPane = new BorderPane(webView);
         webView.setPrefSize(960.0, 600.0);
         Scene scene = new Scene(borderPane, 960, 600);
+        scene.getStylesheets().add("/com/mycompany/requestconverter/static/css/bootstrap.min.css");
         stage.setScene(scene);
         stage.show();
 

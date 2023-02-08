@@ -8,6 +8,8 @@ import com.mycompany.requestconverter.connection.DBConnection;
 import com.mycompany.requestconverter.exceptions.DaoException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -34,8 +36,8 @@ public class ClientDAO {
     public List<Record> findAllRecords(String sprType) throws IOException, URISyntaxException, ClassNotFoundException, SQLException {
         String request = FIND_ALL_SPR.replace("spr", sprType);
         DBConnection dBConnection = new DBConnection();
-         try ( var connection = dBConnection.getConnection();  var preparedStatement = connection.prepareStatement(request)) {
-            var resultSet = preparedStatement.executeQuery();
+         try ( Connection connection = dBConnection.getConnection();  PreparedStatement preparedStatement = connection.prepareStatement(request)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
             List<Record> records = new ArrayList<>();
             while (resultSet.next()) {
                 records.add(buildRecord(resultSet));
@@ -50,8 +52,8 @@ public class ClientDAO {
     
       public List<Request> findAllRequests() throws IOException, URISyntaxException, ClassNotFoundException, SQLException {
           DBConnection dBConnection = new DBConnection();
-        try ( var connection = dBConnection.getConnection();  var preparedStatement = connection.prepareStatement(FIND_ALL_REQUEST)) {
-            var resultSet = preparedStatement.executeQuery();
+        try ( Connection connection = dBConnection.getConnection();  PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_REQUEST)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
             List<Request> requests = new ArrayList<>();
             while (resultSet.next()) {
                 requests.add(buildRequest(resultSet));
@@ -86,9 +88,9 @@ public class ClientDAO {
     public List<DataHistory> getLastChangeFromSpr(String sprType) throws ParseException, IOException, URISyntaxException, ClassNotFoundException, SQLException {
         String request = GET_LAST_CHANGE_FROM_SPR.replace("spr", sprType);
        DBConnection dBConnection = new DBConnection();
-        try ( var connection = dBConnection.getConnection();
-                var preparedStatement = connection.prepareStatement(request)) {             
-            var resultSet = preparedStatement.executeQuery();
+        try ( Connection connection = dBConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(request)) {             
+            ResultSet resultSet = preparedStatement.executeQuery();
             List<DataHistory> sprs = new ArrayList<>();
             while (resultSet.next()) {
                 sprs.add(buildDataHistory(resultSet));
@@ -103,8 +105,8 @@ public class ClientDAO {
     
      public List<DataHistory> getLastChangeFromRequest() throws ParseException, IOException, URISyntaxException, ClassNotFoundException, SQLException {
          DBConnection dBConnection = new DBConnection();
-        try ( var connection = dBConnection.getConnection();  var preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_REQUEST)) {
-            var resultSet = preparedStatement.executeQuery();
+        try ( Connection connection = dBConnection.getConnection();  PreparedStatement preparedStatement = connection.prepareStatement(GET_LAST_CHANGE_FROM_REQUEST)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
             List<DataHistory> requests = new ArrayList<>();
             while (resultSet.next()) {
                 requests.add(buildDataHistory(resultSet));

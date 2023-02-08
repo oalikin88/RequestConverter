@@ -6,28 +6,10 @@
     <version>1.1</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>13</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>13</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-web</artifactId>
-            <version>13</version>
-            <type>jar</type>
-        </dependency>
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
@@ -58,7 +40,7 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                 <filtering>true</filtering>
+                <filtering>true</filtering>
             </resource>
         </resources> 
         <plugins>            
@@ -67,7 +49,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <release>11</release>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>         
             <plugin>
@@ -75,8 +58,8 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.4</version>
                 <configuration>
-                    <launcher>requestconvertor</launcher>
-                    <jlinkImageName>requestconvertor</jlinkImageName>
+                    <launcher>requestconverter</launcher>
+                    <jlinkImageName>requestconverter</jlinkImageName>
                     <jlinkExecutable>${jlinkExecutable}</jlinkExecutable>
                     <mainClass>com.mycompany.requestconverter.Main</mainClass>
                 </configuration>   
@@ -89,9 +72,7 @@
                     <filters>
                         <filter>
                             <artifact>*:*</artifact>
-                          
                             <excludes>
-                                <exclude>module-info.class</exclude>
                                 <exclude>META-INF/*.SF</exclude>
                                 <exclude>META-INF/*.DSA</exclude>
                                 <exclude>META-INF/*.RSA</exclude>
