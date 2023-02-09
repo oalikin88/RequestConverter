@@ -179,6 +179,8 @@ public class PrimaryController {
     private String element;
     private ObservableList<String> upfrList;
     private ObservableList<String> upfrListParentElement;
+    private boolean isVd;
+    private boolean isVoronezh;
     
    
 
@@ -191,6 +193,7 @@ public class PrimaryController {
         stateCode.put("Ростовская область", "ДНР");
         stateCode.put("Воронежская область", "ЛНР");
 
+        
         content = new Content();
         spr = new Spr(SprType.SPR);
         sprVd = new Spr(SprType.SPR_VD);
@@ -613,15 +616,32 @@ public class PrimaryController {
         String val;
         if (sprValue.getValue().equals("Запросы выплатных дел")) {
             val = RequestFormirovationService.getRequestCode(sprVd.getInputContent(), upfr.getValue());
+            isVd = true;
         } else {
             val = RequestFormirovationService.getRequestCode(spr.getInputContent(), upfr.getValue());
+            isVd = false;
         }
 
         // Получение пути сохранения файла
         StringBuilder out = new StringBuilder();
         out.delete(0, out.length());
         out.append(str);
-        out.append(val);
+         if(choiceSuff.isVisible()) {
+        if(null != choiceSuff.getSelectionModel().getSelectedItem()) {
+            if(choiceSuff.getSelectionModel().getSelectedItem().contains("ЛНР") && isVd) {
+            out.append(val.substring(0, 3));
+            isVoronezh = true;
+            
+        } else {
+             out.append(val);
+             isVoronezh = false;
+        } 
+         }
+         
+        } else {
+             out.append(val);
+         } 
+        
         out.append("_");
         if (remember.selectedProperty().getValue()) {
             out.append("(н)");
@@ -632,7 +652,12 @@ public class PrimaryController {
         if(choiceSuff.isVisible()) {
         if(null != choiceSuff.getSelectionModel().getSelectedItem()) {
             out.append("_");
-            out.append(choiceSuff.getSelectionModel().getSelectedItem());
+            if(isVd && isVoronezh) {
+                out.append("ЛО");
+            } else {
+                out.append(choiceSuff.getSelectionModel().getSelectedItem());
+            }
+            
         }
         }
         out.append("_");
@@ -642,6 +667,7 @@ public class PrimaryController {
         out.append(".");
         out.append(fathName);
         out.append(".zip");
+       
         System.out.println(out);
 
         try {
