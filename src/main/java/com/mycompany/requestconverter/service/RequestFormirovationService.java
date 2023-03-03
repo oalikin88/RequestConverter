@@ -16,7 +16,7 @@ public class RequestFormirovationService {
         String out = "";
         for (String s : list) {
                 int i = s.indexOf(";");
-                if (s.substring(0, i).equals(inValue)) {
+                if (s.substring(0, i).toLowerCase().trim().equals(inValue.toLowerCase().trim())) {
 
                     out = s.substring(++i, s.length());
                 }

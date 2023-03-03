@@ -572,7 +572,11 @@ public class PrimaryController {
         Stage stage = new Stage();
         fileChooser = new FileChooser();
         fileChooser.setTitle("Выберите файлы для конвертирования");
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
+        File homeDir = new File(System.getProperty("user.home") + "/desktop");
+        if(!homeDir.exists()) {
+            homeDir.mkdirs();
+            }
+        fileChooser.setInitialDirectory(homeDir);
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Все файлы", "*.*"));
         
        
