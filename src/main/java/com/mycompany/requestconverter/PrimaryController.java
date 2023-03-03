@@ -286,6 +286,7 @@ public class PrimaryController {
         opfr.setItems(oListSpr);
         opfr.setValue(oListSpr.get(0));
         element = opfr.getValue();
+        
         // получение списка УПФР из общего массива
         upfrRecords = CustomListManipulation.getUpfrList(recordsSpr, element);
         upfrList = FXCollections.observableArrayList(upfrRecords.stream().map(e -> e.getName()).collect(Collectors.toList()));
@@ -575,7 +576,11 @@ public class PrimaryController {
         Stage stage = new Stage();
         fileChooser = new FileChooser();
         fileChooser.setTitle("Выберите файлы для конвертирования");
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
+        File homeDir = new File(System.getProperty("user.home") + "/desktop");
+        if(!homeDir.exists()) {
+            homeDir.mkdirs();
+            }
+        fileChooser.setInitialDirectory(homeDir);
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Все файлы", "*.*"));
         
        

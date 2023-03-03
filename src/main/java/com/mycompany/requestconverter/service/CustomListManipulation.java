@@ -76,7 +76,6 @@ public class CustomListManipulation {
     
     // получение списка ОПФР из общего массива
     public static List<String> getOpfrList(String[][] array) {
-        //List<String> parent = new ArrayList<>();
         List<String> list = new ArrayList<>();
 
         for (int i = 0; i < array.length; i++) {
