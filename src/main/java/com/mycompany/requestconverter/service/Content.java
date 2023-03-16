@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,7 +30,7 @@ import java.util.logging.Logger;
 public class Content {
 
     public static String pathToSpr = System.getProperty("user.dir") + "/data/spr.csv";
-    private static String pathToRequest = System.getProperty("user.dir") + "/data/request.csv";
+    public static String pathToRequest = System.getProperty("user.dir") + "/data/request.csv";
     private static String pathToSprHistory = System.getProperty("user.dir") + "/data/spr_history.csv";
     private static String pathToRequestHistory = System.getProperty("user.dir") + "/data/request_history.csv";
 
@@ -51,16 +52,17 @@ public class Content {
     }
     
 
-    public List<String> getRequests() throws IOException, URISyntaxException {
+    public List<String> getRequests() throws IOException  {
         File file;
         try {
             Path getPath = Paths.get(pathToRequest);
-            file = new File(getPath.toUri());
-            List<String> list = Files.readAllLines(file.toPath());
+            
+            List<String> list;
+            list = Files.readAllLines(getPath, StandardCharsets.UTF_8);
             return list;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.getStackTrace();
-            throw new IOException("Отсутствует файл request.csv");
+            throw new IOException(e.getMessage());
         }
     }
 
@@ -85,7 +87,7 @@ public class Content {
         try {
             Path getPath = Paths.get(pathToRequestHistory);
             file = new File(getPath.toUri());
-            List<String> list = Files.readAllLines(file.toPath());
+            List<String> list = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
             return list;
         } catch (IOException e) {
             e.getStackTrace();
@@ -103,7 +105,7 @@ public class Content {
         try {
             getPath1 = Paths.get(request);
             file1 = new File(getPath1.toUri());
-            writer = new FileWriter(file1);
+            writer = new FileWriter(file1, StandardCharsets.UTF_8);
             for (Record rec : inputList) {
                 String subject = rec.getSubject();
                 String opfr = rec.getOpfr();
@@ -139,7 +141,7 @@ public class Content {
         try {
             getPath1 = Paths.get(request);
             file1 = new File(getPath1.toUri());
-            writer = new FileWriter(file1);
+            writer = new FileWriter(file1, StandardCharsets.UTF_8);
             for (DataHistory data : inputList) {
                 Date date = data.getDate();
                 String action = data.getAction();
@@ -173,7 +175,7 @@ public class Content {
         try {
             getPath1 = Paths.get(pathToRequestHistory);
             file1 = new File(getPath1.toUri());
-            writer = new FileWriter(file1);
+            writer = new FileWriter(file1, StandardCharsets.UTF_8);
             for (DataHistory data : inputList) {
                 Date date = data.getDate();
                 String action = data.getAction();
@@ -206,7 +208,7 @@ public class Content {
         try {
             getPath1 = Paths.get(pathToRequest);
             file1 = new File(getPath1.toUri());
-            writer = new FileWriter(file1);
+            writer = new FileWriter(file1, StandardCharsets.UTF_8);
 
             for (Request rec : inputList) {
                 String name = rec.getName();

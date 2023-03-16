@@ -33,6 +33,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -62,6 +63,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
@@ -148,7 +150,7 @@ public class PrimaryController {
 
     @FXML
     private ComboBox<String> upfr;
-    
+
     private String fName;
     private List<DataHistory> sprHistory;
     private List<DataHistory> sprVdHistory;
@@ -181,19 +183,23 @@ public class PrimaryController {
     private ObservableList<String> upfrListParentElement;
     private boolean isVd;
     private boolean isVoronezh;
-    
-   
+
+    private Tooltip attention;
 
     @FXML
     void initialize() throws IOException, URISyntaxException {
-
+        
+        attention = new Tooltip("Поле не может быть пустым, а также не должно содержать следующих знаков: ; * \\ \" | / : ? < >");
+        surname.setTooltip(attention);
+        fathersName.setTooltip(attention);
+        firstName.setTooltip(attention);
+        start.disableProperty().set(true);
         stateCode = new HashMap<>();
         stateCode.put("Севастополь", "ЗО");
         stateCode.put("Республика Крым", "ХО");
         stateCode.put("Ростовская область", "ДНР");
         stateCode.put("Воронежская область", "ЛНР");
 
-        
         content = new Content();
         spr = new Spr(SprType.SPR);
         sprVd = new Spr(SprType.SPR_VD);
@@ -213,17 +219,16 @@ public class PrimaryController {
                     requests = requestHistoryClient.getLastChangeFromRequest();
                     List<String> sprHistoryStrings = spr.getHistory();
                     List<String> sprVdHistoryStrings = sprVd.getHistory();
-                    List<String> requestHistoryStrings = content.getRequestHistoryContent();    
-                  
+                    List<String> requestHistoryStrings = content.getRequestHistoryContent();
+
                     ConvertList convertSprList = new ConvertList();
                     ConvertList convertSprVdList = new ConvertList();
                     ConvertList convertRequestList = new ConvertList();
-                    
+
                     List<DataHistory> sprConvertHistory = convertSprList.getDataHistory(sprHistoryStrings);
                     List<DataHistory> sprVdConvertHistory = convertSprVdList.getDataHistory(sprVdHistoryStrings);
                     List<DataHistory> requestHistory = convertRequestList.getDataHistory(requestHistoryStrings);
-                    
-                    
+
                     compareDataHistoryList1 = DateCompareList.compareDataHistoryList(PrimaryController.this.sprHistory, sprConvertHistory);
                     compareDataHistoryList3 = DateCompareList.compareDataHistoryList(PrimaryController.this.sprVdHistory, sprVdConvertHistory);
                     compareDataHistoryList2 = DateCompareList.compareDataHistoryList(requests, requestHistory);
@@ -273,12 +278,11 @@ public class PrimaryController {
         });
 
         // получение списка ОПФР из общего массива
-        
         recordsSpr = spr.getRecordsFromLocal();
-       
+
         opfrListSpr = CustomListManipulation.getOpfr(recordsSpr);
         oListSpr = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).sorted((o1, o2) -> o1.compareTo(o2)).collect(Collectors.toList()));
-        
+
         sprValueList = FXCollections.observableArrayList(Spr.getSPR().values());
         sprValue.setItems(sprValueList);
         sprValue.setValue(sprValueList.get(0));
@@ -286,7 +290,7 @@ public class PrimaryController {
         opfr.setItems(oListSpr);
         opfr.setValue(oListSpr.get(0));
         element = opfr.getValue();
-        
+
         // получение списка УПФР из общего массива
         upfrRecords = CustomListManipulation.getUpfrList(recordsSpr, element);
         upfrList = FXCollections.observableArrayList(upfrRecords.stream().map(e -> e.getName()).collect(Collectors.toList()));
@@ -362,23 +366,34 @@ public class PrimaryController {
             }
         });
         
+        
+
         choiceSuff.visibleProperty().bind(
                 Bindings.equal("Воронежская область", upfr.getSelectionModel().selectedItemProperty()).or(
                         Bindings.equal("Севастополь", upfr.getSelectionModel().selectedItemProperty()).or(
                                 Bindings.equal("Республика Крым", upfr.getSelectionModel().selectedItemProperty()).or(
                                         Bindings.equal("Ростовская область", upfr.getSelectionModel().selectedItemProperty())))));
-        
+
         labelSuff.visibleProperty().bind(
                 Bindings.equal("Воронежская область", upfr.getSelectionModel().selectedItemProperty()).or(
                         Bindings.equal("Севастополь", upfr.getSelectionModel().selectedItemProperty()).or(
                                 Bindings.equal("Республика Крым", upfr.getSelectionModel().selectedItemProperty()).or(
                                         Bindings.equal("Ростовская область", upfr.getSelectionModel().selectedItemProperty())))));
+        
+        Pattern inputTextFieldPattern = Pattern.compile("[;*\"|/:?<>]");
+        
+         start.disableProperty().bind(Bindings.isEmpty(surname.textProperty())
+                 .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(firstName.getText()).find(), firstName.textProperty()))
+                 .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(surname.getText()).find(), surname.textProperty()))
+                 .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(fathersName.getText()).find(), fathersName.textProperty()))
+                 .or(Bindings.isEmpty(firstName.textProperty()))
+                 .or(Bindings.isEmpty(fathersName.textProperty()))
+                 .or(Bindings.createBooleanBinding(() -> surname.getText().isBlank(), surname.textProperty()))
+                 .or(Bindings.createBooleanBinding(() -> firstName.getText().isBlank(), firstName.textProperty()))
+                 .or(Bindings.createBooleanBinding(() -> fathersName.getText().isBlank(), fathersName.textProperty()))
+                
+                 );
 
-        start.disableProperty().bind(
-                Bindings.isEmpty(surname.textProperty())
-                        .or(Bindings.isEmpty(firstName.textProperty()))
-                        .or(Bindings.isEmpty(fathersName.textProperty()))
-        );
 
         sprValue.getSelectionModel().selectedItemProperty().addListener((Override, t, t1) -> {
             if (t1.contains(sprValueList.get(1))) {
@@ -387,7 +402,7 @@ public class PrimaryController {
                 oListSpr = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).sorted((o1, o2) -> o1.compareTo(o2)).collect(Collectors.toList()));
                 //opfr.getItems().addAll(oListSprVd);
                 opfr.setItems(oListSpr);
-                
+
                 opfr.setValue(oListSpr.get(0));
                 element = opfr.getValue();
                 upfrRecords = CustomListManipulation.getUpfrList(recordsSprVd, element);
@@ -500,7 +515,7 @@ public class PrimaryController {
         TextField fieldUsername = new TextField();
         Label labelPassword = new Label("Пароль");
         PasswordField fieldPassword = new PasswordField();
-       
+
         fieldUrl.setText(settings.getUrl());
         fieldDataBaseName.setText(settings.getDbName());
         fieldUsername.setText(settings.getUsername());
@@ -516,7 +531,6 @@ public class PrimaryController {
         StackPane stackPane8 = new StackPane();
         StackPane stackPane9 = new StackPane();
         StackPane stackPane10 = new StackPane();
-
         stackPane1.getChildren().add(labelUrl);
         stackPane2.getChildren().add(fieldUrl);
         stackPane3.getChildren().add(labelPort);
@@ -577,35 +591,32 @@ public class PrimaryController {
         fileChooser = new FileChooser();
         fileChooser.setTitle("Выберите файлы для конвертирования");
         File homeDir = new File(System.getProperty("user.home") + "/desktop");
-        if(!homeDir.exists()) {
+        if (!homeDir.exists()) {
             homeDir.mkdirs();
-            }
+        }
         fileChooser.setInitialDirectory(homeDir);
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Все файлы", "*.*"));
-        
-       
-        
-        
+
         List<File> selectedFiles = fileChooser.showOpenMultipleDialog(stage);
         final DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Выберите директорию куда сохранить файл");
-         File cacheFile = new File("directory.txt");
-        if(cacheFile.exists()) {
-            try(InputStream inputStream = new FileInputStream(cacheFile)) {
+        File cacheFile = new File("directory.txt");
+        if (cacheFile.exists()) {
+            try ( InputStream inputStream = new FileInputStream(cacheFile)) {
                 byte[] bytes = new byte[(int) cacheFile.length()];
                 inputStream.read(bytes);
                 File directory = new File(new String(bytes));
-                if(directory.exists()) {
+                if (directory.exists()) {
                     directoryChooser.setInitialDirectory(directory);
                 } else {
-                 directoryChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
+                    directoryChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/desktop"));
                 }
             }
         }
-       
+
         File selectedDirectory = directoryChooser.showDialog(stage);
-        if(selectedDirectory != null) {
-            try(OutputStream outputStream = new FileOutputStream(cacheFile)) {
+        if (selectedDirectory != null) {
+            try ( OutputStream outputStream = new FileOutputStream(cacheFile)) {
                 byte[] bytes = selectedDirectory.getParent().getBytes();
                 outputStream.write(bytes);
             }
@@ -620,10 +631,10 @@ public class PrimaryController {
         // Получение кода района
         String val;
         if (sprValue.getValue().equals("Запросы выплатных дел")) {
-            val = RequestFormirovationService.getRequestCode(sprVd.getInputContent(), upfr.getValue());
+            val = RequestFormirovationService.getRequestCode(sprVd.getInputContent(), opfr.getValue(), upfr.getValue());
             isVd = true;
         } else {
-            val = RequestFormirovationService.getRequestCode(spr.getInputContent(), upfr.getValue());
+            val = RequestFormirovationService.getRequestCode(spr.getInputContent(), opfr.getValue(), upfr.getValue());
             isVd = false;
         }
 
@@ -631,22 +642,22 @@ public class PrimaryController {
         StringBuilder out = new StringBuilder();
         out.delete(0, out.length());
         out.append(str);
-         if(choiceSuff.isVisible()) {
-        if(null != choiceSuff.getSelectionModel().getSelectedItem()) {
-            if(choiceSuff.getSelectionModel().getSelectedItem().contains("ЛНР") && isVd) {
-            out.append(val.substring(0, 3));
-            isVoronezh = true;
-            
+        if (choiceSuff.isVisible()) {
+            if (null != choiceSuff.getSelectionModel().getSelectedItem()) {
+                if (choiceSuff.getSelectionModel().getSelectedItem().contains("ЛНР") && isVd) {
+                    out.append(val.substring(0, 3));
+                    isVoronezh = true;
+
+                } else {
+                    out.append(val);
+                    isVoronezh = false;
+                }
+            }
+
         } else {
-             out.append(val);
-             isVoronezh = false;
-        } 
-         }
-         
-        } else {
-             out.append(val);
-         } 
-        
+            out.append(val);
+        }
+
         out.append("_");
         if (remember.selectedProperty().getValue()) {
             out.append("(н)");
@@ -654,16 +665,16 @@ public class PrimaryController {
         out.append(RequestFormirovationService.getRequestValue(requestList, requestFile.getValue()));
 
         //if
-        if(choiceSuff.isVisible()) {
-        if(null != choiceSuff.getSelectionModel().getSelectedItem()) {
-            out.append("_");
-            if(isVd && isVoronezh) {
-                out.append("ЛО");
-            } else {
-                out.append(choiceSuff.getSelectionModel().getSelectedItem());
+        if (choiceSuff.isVisible()) {
+            if (null != choiceSuff.getSelectionModel().getSelectedItem()) {
+                out.append("_");
+                if (isVd && isVoronezh) {
+                    out.append("ЛО");
+                } else {
+                    out.append(choiceSuff.getSelectionModel().getSelectedItem());
+                }
+
             }
-            
-        }
         }
         out.append("_");
         out.append(sName);
@@ -672,11 +683,11 @@ public class PrimaryController {
         out.append(".");
         out.append(fathName);
         out.append(".zip");
-       
+
         System.out.println(out);
 
         try {
-            
+
             ZipFileService.zipMultipleFiles(selectedFiles, out.toString());
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setTitle("Сообщение");
@@ -693,10 +704,9 @@ public class PrimaryController {
 
         if (compareDataHistoryList1 == -1) {
 
-            
             // подумать как автоматически подтягивать нужный справочник
             List<Record> inputFromSprDB = spr.getRecordsFromDB();
-            
+
             spr.writeSpr(inputFromSprDB);
             spr.writeHistory(sprHistory);
             Platform.runLater(() -> statusBarInfo.setText("База данных успешно обновлена"));
@@ -714,15 +724,13 @@ public class PrimaryController {
                 statusBarInfo.setText("Готов к работе");
             });
         }
-        
-            if (compareDataHistoryList3 == -1) {
 
-            
+        if (compareDataHistoryList3 == -1) {
+
             List<Record> inputFromSprVdDB = sprVd.getRecordsFromDB();
             sprVd.writeSpr(inputFromSprVdDB);
             sprVd.writeHistory(sprVdHistory);
-            
-            //content.writeSprHistory(sprs);
+
             Platform.runLater(() -> statusBarInfo.setText("База данных успешно обновлена"));
             recordsSprVd = sprVd.getRecordsFromLocal();
             opfrListSpr = CustomListManipulation.getOpfr(recordsSprVd);
@@ -790,7 +798,7 @@ public class PrimaryController {
         dialog.setHeaderText(null);
         TextFlow textFlow = new TextFlow();
         LocalDateTime date = LocalDateTime.now();
-        
+
         VBox vBox = new VBox();
         Text name = new Text("Конвертер запросов СФР ver." + ver);
         Text author = new Text("Разработка: Аликин Олег Сергеевич");
