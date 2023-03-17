@@ -24,21 +24,30 @@ public class RequestFormirovationService {
         return out;
     }
     
-    public static String getRequestCode(String[][] array, String value) {
+   public static String getRequestCode(String[][] array, String opfr, String upfr) {
         
         String s = "";
+        String buffer = "";
+        
          for (int i = 0; i < array.length; i++) {
                 for (int j = 0; j < 4; j++) {
-                    if (array[i][j].toLowerCase().trim().equals(value.toLowerCase().trim())) {
+                    if(array[i][j].toLowerCase().trim().equals(opfr.toLowerCase().trim())){
+                        buffer = array[i][j-3];
+                    }}}
+         for (int i = 0; i < array.length; i++) {
+                for (int j = 0; j < 4; j++) {
+                    if (array[i][j].toLowerCase().trim().equals(upfr.toLowerCase().trim()) && array[i][j-3].trim().equals(buffer.trim())) {
                         s += array[i][j - 3];
                         s += array[i][j - 2];
                         s += array[i][j - 1];
 
-                    }
+                
                 }
             }
         
-        return s;
+        
     }
+    return s;
+}
     
 }

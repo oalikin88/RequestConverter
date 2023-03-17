@@ -11,18 +11,34 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.requestconverter.PrimaryController">
    <children>
       <AnchorPane prefHeight="47.0" prefWidth="600.0" />
-      <ComboBox fx:id="requestFile" layoutX="144.0" layoutY="74.0" prefHeight="25.0" prefWidth="437.0" />
-      <ComboBox fx:id="upfr" layoutX="144.0" layoutY="151.0" prefHeight="25.0" prefWidth="437.0" />
-      <ComboBox fx:id="opfr" layoutX="144.0" layoutY="112.0" prefHeight="25.0" prefWidth="437.0" />
-      <TextField fx:id="surname" layoutX="144.0" layoutY="193.0" prefHeight="25.0" prefWidth="151.0" />
-      <TextField fx:id="firstName" layoutX="464.0" layoutY="193.0" prefHeight="25.0" prefWidth="25.0" />
-      <TextField fx:id="fathersName" layoutX="555.0" layoutY="194.0" prefHeight="25.0" prefWidth="25.0" />
-      <Button fx:id="start" layoutX="477.0" layoutY="273.0" mnemonicParsing="false" onAction="#submit" text="Преобразовать" />
-      <CheckBox fx:id="remember" layoutX="24.0" layoutY="236.0" mnemonicParsing="false" text="Добавить напоминание при формировании запроса" />
+      <ComboBox fx:id="requestFile" layoutX="144.0" layoutY="74.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
+      <ComboBox fx:id="upfr" layoutX="144.0" layoutY="151.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
+      <ComboBox fx:id="opfr" layoutX="144.0" layoutY="112.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
+      <TextField fx:id="surname" layoutX="144.0" layoutY="193.0" prefHeight="25.0" prefWidth="151.0">
+         <font>
+            <Font size="14.0" />
+         </font></TextField>
+      <TextField fx:id="firstName" layoutX="443.0" layoutY="193.0" prefHeight="25.0" prefWidth="30.0">
+         <font>
+            <Font size="14.0" />
+         </font></TextField>
+      <TextField fx:id="fathersName" layoutX="550.0" layoutY="194.0" prefHeight="25.0" prefWidth="30.0">
+         <font>
+            <Font size="14.0" />
+         </font></TextField>
+      <Button fx:id="start" layoutX="477.0" layoutY="273.0" mnemonicParsing="false" onAction="#submit" text="Преобразовать">
+         <font>
+            <Font size="14.0" />
+         </font></Button>
+      <CheckBox fx:id="remember" layoutX="24.0" layoutY="236.0" mnemonicParsing="false" text="Добавить напоминание при формировании запроса">
+         <font>
+            <Font size="14.0" />
+         </font></CheckBox>
       <MenuBar fx:id="menu" prefHeight="25.0" prefWidth="600.0">
         <menus>
           <Menu fx:id="menuFile" mnemonicParsing="false" text="Файл">
@@ -40,21 +56,48 @@
           </Menu>
         </menus>
       </MenuBar>
-      <Label layoutX="24.0" layoutY="78.0" prefHeight="17.0" prefWidth="72.0" text="Запрос:" />
-      <Label layoutX="24.0" layoutY="116.0" prefHeight="17.0" prefWidth="72.0" text="ОCФР:" />
-      <Label layoutX="24.0" layoutY="155.0" prefHeight="17.0" prefWidth="72.0" text="УCФР:" />
-      <Label layoutX="24.0" layoutY="197.0" prefHeight="17.0" prefWidth="72.0" text="Фамилия:" />
-      <Label layoutX="330.0" layoutY="198.0" prefHeight="17.0" prefWidth="72.0" text="Инициалы" />
-      <Label layoutX="430.0" layoutY="198.0" prefHeight="17.0" prefWidth="34.0" text="Имя:" />
-      <Label layoutX="494.0" layoutY="198.0" prefHeight="17.0" prefWidth="55.0" text="Отчество:" />
+      <Label layoutX="24.0" layoutY="78.0" prefHeight="17.0" prefWidth="72.0" text="Запрос:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="24.0" layoutY="116.0" prefHeight="17.0" prefWidth="72.0" text="ОCФР:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="24.0" layoutY="155.0" prefHeight="17.0" prefWidth="72.0" text="УCФР:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="24.0" layoutY="197.0" prefHeight="17.0" prefWidth="72.0" text="Фамилия:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="319.0" layoutY="198.0" prefHeight="17.0" prefWidth="72.0" text="Инициалы">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="409.0" layoutY="198.0" prefHeight="17.0" prefWidth="34.0" text="Имя:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="483.0" layoutY="198.0" prefHeight="20.0" prefWidth="72.0" text="Отчество:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
       <Label layoutX="24.0" layoutY="325.0" prefHeight="25.0" prefWidth="72.0" text="Статус:" />
       <Label fx:id="statusBarInfo" layoutX="74.0" layoutY="325.0" prefHeight="25.0" prefWidth="514.0" textAlignment="CENTER" />
-      <ChoiceBox fx:id="choiceSuff" layoutX="145.0" layoutY="273.0" prefWidth="150.0">
+      <ChoiceBox fx:id="choiceSuff" layoutX="145.0" layoutY="273.0" prefWidth="150.0" style="-fx-font-size: 14;">
          <opaqueInsets>
             <Insets />
          </opaqueInsets></ChoiceBox>
-      <Label fx:id="labelSuff" layoutX="24.0" layoutY="277.0" prefHeight="17.0" prefWidth="90.0" text="Суффикс:" />
-      <Label layoutX="24.0" layoutY="40.0" prefHeight="17.0" prefWidth="72.0" text="Справочник:" />
-      <ComboBox fx:id="sprValue" layoutX="144.0" layoutY="36.0" prefHeight="25.0" prefWidth="437.0" />
+      <Label fx:id="labelSuff" layoutX="24.0" layoutY="277.0" prefHeight="17.0" prefWidth="90.0" text="Суффикс:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="24.0" layoutY="40.0" prefHeight="20.0" prefWidth="90.0" text="Справочник:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <ComboBox fx:id="sprValue" layoutX="144.0" layoutY="36.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
    </children>
 </AnchorPane>

@@ -9,15 +9,18 @@ import com.mycompany.requestconverter.data.DataHistory;
 import com.mycompany.requestconverter.data.Record;
 import com.mycompany.requestconverter.data.Request;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,7 +46,7 @@ public class Content {
         try {
             Path getPath = Paths.get(request);
             file = new File(getPath.toUri());
-            List<String> list = Files.readAllLines(file.toPath());
+            List<String> list = Files.readAllLines(file.toPath(), Charset.forName("UTF-8"));
             return list;
         } catch (IOException e) {
             e.getStackTrace();
@@ -57,7 +60,7 @@ public class Content {
         try {
             Path getPath = Paths.get(pathToRequest);
             file = new File(getPath.toUri());
-            List<String> list = Files.readAllLines(file.toPath());
+            List<String> list = Files.readAllLines(file.toPath(), Charset.forName("UTF-8"));
             return list;
         } catch (IOException e) {
             e.getStackTrace();
@@ -72,7 +75,7 @@ public class Content {
         try {
             Path getPath = Paths.get(request);
             file = new File(getPath.toUri());
-            List<String> list = Files.readAllLines(file.toPath());
+            List<String> list = Files.readAllLines(file.toPath(), Charset.forName("UTF-8"));
             return list;
         } catch (IOException e) {
             e.getStackTrace();
@@ -86,7 +89,7 @@ public class Content {
         try {
             Path getPath = Paths.get(pathToRequestHistory);
             file = new File(getPath.toUri());
-            List<String> list = Files.readAllLines(file.toPath());
+            List<String> list = Files.readAllLines(file.toPath(), Charset.forName("UTF-8"));
             return list;
         } catch (IOException e) {
             e.getStackTrace();
@@ -100,19 +103,21 @@ public class Content {
         File file1;
         Path getPath1;
         FileWriter writer = null;
+        OutputStreamWriter wr = null;
 
         try {
             getPath1 = Paths.get(request);
             file1 = new File(getPath1.toUri());
-            writer = new FileWriter(file1);
+            wr = new OutputStreamWriter(new FileOutputStream(file1), StandardCharsets.UTF_8);
+            
             for (Record rec : inputList) {
                 String subject = rec.getSubject();
                 String opfr = rec.getOpfr();
                 String upfr = rec.getUpfr();
                 String name = rec.getName();
-                writer.write(subject + ";" + opfr + ";" + upfr + ";" + name);
+                wr.write(subject + ";" + opfr + ";" + upfr + ";" + name);
                 if (inputList.iterator().hasNext()) {
-                    writer.write("\n");
+                    wr.write("\n");
                 }
             }
 
@@ -120,13 +125,13 @@ public class Content {
         } catch (IOException ex) {
             Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            if (writer != null)
+            if (wr != null)
             try {
-
-                writer.close();
+                wr.close();
             } catch (IOException ex) {
                 Logger.getLogger(Content.class.getName()).log(Level.SEVERE, null, ex);
             }
+           
         }
 
     }
@@ -135,20 +140,20 @@ public class Content {
         String request = pathToSprHistory.replace("spr", target);
         File file1;
         Path getPath1;
-        FileWriter writer = null;
+        OutputStreamWriter wr  = null;
 
         try {
             getPath1 = Paths.get(request);
             file1 = new File(getPath1.toUri());
-            writer = new FileWriter(file1);
+            wr = new OutputStreamWriter(new FileOutputStream(file1), StandardCharsets.UTF_8);
             for (DataHistory data : inputList) {
                 Date date = data.getDate();
                 String action = data.getAction();
                 int id = data.getId();
-                writer.write(df.format(date) + ";" + action + ";" + id);
+                wr.write(df.format(date) + ";" + action + ";" + id);
 
                 if (inputList.iterator().hasNext()) {
-                    writer.write("\n");
+                    wr.write("\n");
                 }
             }
 
@@ -156,9 +161,9 @@ public class Content {
         } catch (IOException ex) {
             Logger.getLogger(Content.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            if (writer != null) {
+            if (wr != null) {
                 try {
-                    writer.close();
+                    wr.close();
                 } catch (IOException ex) {
                     Logger.getLogger(Content.class.getName()).log(Level.SEVERE, null, ex);
 
@@ -170,28 +175,28 @@ public class Content {
     public void writeRequestHistory(List<DataHistory> inputList) throws IOException, URISyntaxException {
         File file1;
         Path getPath1;
-        FileWriter writer = null;
+        OutputStreamWriter wr = null;
         try {
             getPath1 = Paths.get(pathToRequestHistory);
             file1 = new File(getPath1.toUri());
-            writer = new FileWriter(file1);
+            wr = new OutputStreamWriter(new FileOutputStream(file1), StandardCharsets.UTF_8);
             for (DataHistory data : inputList) {
                 Date date = data.getDate();
                 String action = data.getAction();
                 int id = data.getId();
-                writer.write(df.format(date) + ";" + action + ";" + id);
+                wr.write(df.format(date) + ";" + action + ";" + id);
 
                 if (inputList.iterator().hasNext()) {
-                    writer.write("\n");
+                    wr.write("\n");
                 }
             }
             System.out.println("Запись в файл request_history.csv прошла успешно.");
         } catch (IOException ex) {
             Logger.getLogger(Content.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            if (writer != null) {
+            if (wr != null) {
                 try {
-                    writer.close();
+                    wr.close();
                 } catch (IOException ex) {
                     Logger.getLogger(Content.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -203,28 +208,30 @@ public class Content {
         File file1;
         Path getPath1;
         FileWriter writer = null;
+        OutputStreamWriter wr = null;
 
         try {
             getPath1 = Paths.get(pathToRequest);
             file1 = new File(getPath1.toUri());
-            writer = new FileWriter(file1);
+            wr = new OutputStreamWriter(new FileOutputStream(file1), StandardCharsets.UTF_8);
+            
 
             for (Request rec : inputList) {
                 String name = rec.getName();
                 String shortName = rec.getShortName();
-                writer.write(name + ";" + shortName);
+                wr.write(name + ";" + shortName);
 
                 if (inputList.iterator().hasNext()) {
-                    writer.write("\n");
+                    wr.write("\n");
                 }
             }
             System.out.println("Запись в файл request.csv прошла успешно.");
         } catch (IOException ex) {
             Logger.getLogger(Content.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            if (writer != null) {
+            if (wr != null) {
                 try {
-                    writer.close();
+                    wr.close();
                 } catch (IOException ex) {
                     Logger.getLogger(Content.class.getName()).log(Level.SEVERE, null, ex);
                 }

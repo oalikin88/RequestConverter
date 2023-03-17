@@ -616,9 +616,9 @@ public class PrimaryController {
         // Получение кода района
         String val;
         if (sprValue.getValue().equals("Запросы выплатных дел")) {
-            val = RequestFormirovationService.getRequestCode(sprVd.getInputContent(), upfr.getValue());
+            val = RequestFormirovationService.getRequestCode(sprVd.getInputContent(), opfr.getValue(), upfr.getValue());
         } else {
-            val = RequestFormirovationService.getRequestCode(spr.getInputContent(), upfr.getValue());
+            val = RequestFormirovationService.getRequestCode(spr.getInputContent(), opfr.getValue(), upfr.getValue());
         }
 
         // Получение пути сохранения файла

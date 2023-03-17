@@ -22,6 +22,7 @@ import java.util.List;
  *
  * @author 041AlikinOS
  */
+
 public class ClientDAO {
     
     private static final String GET_LAST_CHANGE_FROM_SPR = "SELECT * FROM requestconverter.spr_history WHERE dt_datetime IN (SELECT max(dt_datetime) FROM requestconverter.spr_history)";
