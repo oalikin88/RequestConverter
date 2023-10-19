@@ -812,7 +812,7 @@ public class PrimaryController {
         Text name = new Text("Конвертер запросов СФР ver." + ver);
         Text author = new Text("Разработка: Аликин Олег Сергеевич");
         Text info = new Text("Отдел эксплуатации и сопровождения информационных подсистем");
-        Text email = new Text("email: alikino@041.pfr.gov.ru");
+        Text email = new Text("email: alikino@31.sfr.gov.ru");
         Text copyright = new Text("© 2008 - " + date.getYear() + " Отделение СФР по Белгородской области");
         info.setWrappingWidth(450);
         textFlow.getChildren().add(vBox);
