@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="397.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.requestconverter.PrimaryController">
+   <children>
+      <AnchorPane prefHeight="47.0" prefWidth="600.0" />
+      <ComboBox fx:id="requestFile" layoutX="144.0" layoutY="74.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
+      <ComboBox fx:id="upfr" layoutX="144.0" layoutY="151.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
+      <ComboBox fx:id="opfr" layoutX="144.0" layoutY="112.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
+      <TextField fx:id="surname" layoutX="144.0" layoutY="193.0" prefHeight="25.0" prefWidth="151.0">
+         <font>
+            <Font size="14.0" />
+         </font></TextField>
+      <TextField fx:id="firstName" layoutX="443.0" layoutY="193.0" prefHeight="25.0" prefWidth="30.0">
+         <font>
+            <Font size="14.0" />
+         </font></TextField>
+      <TextField fx:id="fathersName" layoutX="550.0" layoutY="194.0" prefHeight="25.0" prefWidth="30.0">
+         <font>
+            <Font size="14.0" />
+         </font></TextField>
+      <Button fx:id="start" layoutX="477.0" layoutY="321.0" mnemonicParsing="false" onAction="#submit" text="Преобразовать">
+         <font>
+            <Font size="14.0" />
+         </font></Button>
+      <CheckBox fx:id="remember" layoutX="24.0" layoutY="236.0" mnemonicParsing="false" text="Добавить напоминание при формировании запроса">
+         <font>
+            <Font size="14.0" />
+         </font></CheckBox>
+      <MenuBar fx:id="menu" prefHeight="25.0" prefWidth="600.0">
+        <menus>
+          <Menu fx:id="menuFile" mnemonicParsing="false" text="Файл">
+            <items>
+              <MenuItem fx:id="getUpdate" mnemonicParsing="false" onAction="#actionGetUpdate" text="Получить обновление БД" />
+                  <MenuItem mnemonicParsing="false" onAction="#properties" text="Настройки" />
+                  <MenuItem fx:id="menuCloseButton" mnemonicParsing="false" text="Закрыть" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Справка">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#instruction" text="Инструкция" />
+                  <MenuItem mnemonicParsing="false" onAction="#actionAbout" text="О программе" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <Label layoutX="24.0" layoutY="78.0" prefHeight="17.0" prefWidth="72.0" text="Запрос:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="24.0" layoutY="116.0" prefHeight="17.0" prefWidth="72.0" text="ОCФР:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="24.0" layoutY="155.0" prefHeight="17.0" prefWidth="72.0" text="УCФР:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="24.0" layoutY="197.0" prefHeight="17.0" prefWidth="72.0" text="Фамилия:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="319.0" layoutY="198.0" prefHeight="17.0" prefWidth="72.0" text="Инициалы">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="409.0" layoutY="198.0" prefHeight="17.0" prefWidth="34.0" text="Имя:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="483.0" layoutY="198.0" prefHeight="20.0" prefWidth="72.0" text="Отчество:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="24.0" layoutY="361.0" prefHeight="25.0" prefWidth="72.0" text="Статус:" />
+      <Label fx:id="statusBarInfo" layoutX="74.0" layoutY="361.0" prefHeight="25.0" prefWidth="514.0" textAlignment="CENTER" />
+      <ChoiceBox fx:id="choiceSuff" layoutX="145.0" layoutY="321.0" prefWidth="150.0" style="-fx-font-size: 14;">
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets></ChoiceBox>
+      <Label fx:id="labelSuff" layoutX="24.0" layoutY="325.0" prefHeight="17.0" prefWidth="90.0" text="Суффикс:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <Label layoutX="24.0" layoutY="40.0" prefHeight="20.0" prefWidth="90.0" text="Справочник:">
+         <font>
+            <Font size="14.0" />
+         </font></Label>
+      <ComboBox fx:id="sprValue" layoutX="144.0" layoutY="36.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
+      <CheckBox fx:id="sendToBank" layoutX="24.0" layoutY="266.0" mnemonicParsing="false" text="Добавить ЦБ к имени запроса">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </CheckBox>
+   </children>
+</AnchorPane>

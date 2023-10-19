@@ -118,6 +118,9 @@ public class PrimaryController {
 
     @FXML
     private CheckBox remember;
+    
+    @FXML
+    private CheckBox sendToBank;
 
     @FXML
     private ComboBox<String> requestFile;
@@ -626,6 +629,9 @@ public class PrimaryController {
         out.delete(0, out.length());
         out.append(str);
         out.append(val);
+        if (sendToBank.selectedProperty().getValue()) {
+            out.append("(ЦБ)");
+        }
         out.append("_");
         if (remember.selectedProperty().getValue()) {
             out.append("(н)");
@@ -741,11 +747,12 @@ public class PrimaryController {
         stage.setTitle("Инструкция по работе с приложением \"Конвертер запросов CФР\"");
         WebView webView = new WebView();
         WebEngine webEngine = webView.getEngine();
-        webEngine.load(getClass().getResource("/com/mycompany/requestconverter/html/help.html").toExternalForm());
+        ClassLoader loader = App.class.getClassLoader();
+        webEngine.load(loader.getResource("com/mycompany/requestconverter/html/help.html").toExternalForm());
         BorderPane borderPane = new BorderPane(webView);
         webView.setPrefSize(960.0, 600.0);
         Scene scene = new Scene(borderPane, 960, 600);
-        scene.getStylesheets().add("/com/mycompany/requestconverter/static/css/bootstrap.min.css");
+        scene.getStylesheets().add("com/mycompany/requestconverter/static/css/bootstrap.min.css");
         stage.setScene(scene);
         stage.show();
 
@@ -769,7 +776,7 @@ public class PrimaryController {
         Text name = new Text("Конвертер запросов СФР ver." + ver);
         Text author = new Text("Разработка: Аликин Олег Сергеевич");
         Text info = new Text("Отдел эксплуатации и сопровождения информационных подсистем");
-        Text email = new Text("email: alikino@041.pfr.gov.ru");
+        Text email = new Text("email: alikino@31.sfr.gov.ru");
         Text copyright = new Text("© 2008 - " + date.getYear() + " Отделение СФР по Белгородской области");
         info.setWrappingWidth(450);
         textFlow.getChildren().add(vBox);
