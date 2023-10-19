@@ -151,6 +151,9 @@ public class PrimaryController {
     @FXML
     private ComboBox<String> upfr;
 
+    @FXML
+    private CheckBox sendToBank;
+    
     private String fName;
     private List<DataHistory> sprHistory;
     private List<DataHistory> sprVdHistory;
@@ -658,6 +661,12 @@ public class PrimaryController {
             out.append(val);
         }
 
+        
+        
+        if (sendToBank.selectedProperty().getValue()) {
+            out.append("(ЦБ)");
+        }
+        
         out.append("_");
         if (remember.selectedProperty().getValue()) {
             out.append("(н)");

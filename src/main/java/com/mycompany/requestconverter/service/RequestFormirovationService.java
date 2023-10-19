@@ -41,7 +41,7 @@ public class RequestFormirovationService {
                         s += array[i][j - 2];
                         s += array[i][j - 1];
 
-                
+                        
                 }
             }
         

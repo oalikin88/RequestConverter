@@ -10,7 +10,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:3.0.0:exec</goal>
             </goals>
             <properties>
-                <exec.vmArgs>--module-path "C:\Java\javafx-sdk-19\lib" --add-modules javafx.controls,javafx.fxml,javafx.web</exec.vmArgs>
+                <exec.vmArgs>--module-path "C:\javafx-sdk-11.0.2\lib" --add-modules javafx.controls,javafx.fxml,javafx.web</exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.appArgs></exec.appArgs>
                 <exec.mainClass>com.mycompany.requestconverter.Main</exec.mainClass>
@@ -27,7 +27,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:3.0.0:exec</goal>
             </goals>
             <properties>
-                <exec.vmArgs>--module-path "C:\Java\javafx-sdk-19\lib" --add-modules javafx.controls,javafx.fxml,javafx.web -agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</exec.vmArgs>
+                <exec.vmArgs>--module-path "C:\javafx-sdk-11.0.2\lib" --add-modules javafx.controls,javafx.fxml,javafx.web -agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.appArgs></exec.appArgs>
                 <exec.mainClass>com.mycompany.requestconverter.Main</exec.mainClass>
@@ -45,7 +45,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:3.0.0:exec</goal>
             </goals>
             <properties>
-                <exec.vmArgs>--module-path "C:\Java\javafx-sdk-19\lib" --add-modules javafx.controls,javafx.fxml,javafx.web</exec.vmArgs>
+                <exec.vmArgs>--module-path "C:\javafx-sdk-11.0.2\lib" --add-modules javafx.controls,javafx.fxml,javafx.web</exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.mainClass>com.mycompany.requestconverter.Main</exec.mainClass>
                 <exec.executable>java</exec.executable>

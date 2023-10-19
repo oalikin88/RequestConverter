@@ -3,9 +3,9 @@ module com.mycompany.requestconverter {
     requires javafx.fxml;
     requires javafx.web;
     requires java.sql;
-    requires java.base;
     requires javafx.base;
     requires java.naming;
+    requires java.base;
   
 
     opens com.mycompany.requestconverter to javafx.fxml;
