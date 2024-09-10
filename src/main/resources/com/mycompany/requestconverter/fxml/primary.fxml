@@ -5,33 +5,34 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="388.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.requestconverter.PrimaryController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="388.0" prefWidth="644.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.requestconverter.PrimaryController">
    <children>
-      <AnchorPane prefHeight="47.0" prefWidth="600.0" />
-      <ComboBox fx:id="requestFile" layoutX="144.0" layoutY="74.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
-      <ComboBox fx:id="upfr" layoutX="144.0" layoutY="151.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
-      <ComboBox fx:id="opfr" layoutX="144.0" layoutY="112.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
+      <ComboBox fx:id="request" layoutX="144.0" layoutY="36.0" prefHeight="28.0" prefWidth="467.0" style="-fx-font-size: 14;" />
+      <ComboBox fx:id="upfr" layoutX="144.0" layoutY="151.0" prefHeight="28.0" prefWidth="467.0" style="-fx-font-size: 14;" />
+      <ComboBox fx:id="opfr" layoutX="144.0" layoutY="112.0" prefHeight="28.0" prefWidth="467.0" style="-fx-font-size: 14;" />
       <TextField fx:id="surname" layoutX="144.0" layoutY="193.0" prefHeight="25.0" prefWidth="151.0">
          <font>
             <Font size="14.0" />
          </font></TextField>
-      <TextField fx:id="firstName" layoutX="446.0" layoutY="193.0" prefHeight="25.0" prefWidth="30.0">
+      <TextField fx:id="firstName" layoutX="450.0" layoutY="193.0" prefHeight="25.0" prefWidth="30.0">
          <font>
             <Font size="14.0" />
          </font></TextField>
-      <TextField fx:id="fathersName" layoutX="550.0" layoutY="194.0" prefHeight="25.0" prefWidth="30.0">
+      <TextField fx:id="fathersName" layoutX="581.0" layoutY="194.0" prefHeight="25.0" prefWidth="30.0">
          <font>
             <Font size="14.0" />
          </font></TextField>
-      <Button fx:id="start" layoutX="477.0" layoutY="314.0" mnemonicParsing="false" onAction="#submit" text="Преобразовать">
+      <Button fx:id="start" layoutX="495.0" layoutY="313.0" mnemonicParsing="false" onAction="#submit" text="Преобразовать">
          <font>
             <Font size="14.0" />
          </font></Button>
@@ -39,7 +40,7 @@
          <font>
             <Font size="14.0" />
          </font></CheckBox>
-      <MenuBar fx:id="menu" prefHeight="25.0" prefWidth="600.0">
+      <MenuBar fx:id="menu" prefHeight="25.0" prefWidth="644.0">
         <menus>
           <Menu fx:id="menuFile" mnemonicParsing="false" text="Файл">
             <items>
@@ -56,10 +57,6 @@
           </Menu>
         </menus>
       </MenuBar>
-      <Label layoutX="24.0" layoutY="78.0" prefHeight="17.0" prefWidth="72.0" text="Запрос:">
-         <font>
-            <Font size="14.0" />
-         </font></Label>
       <Label layoutX="24.0" layoutY="116.0" prefHeight="17.0" prefWidth="72.0" text="ОCФР:">
          <font>
             <Font size="14.0" />
@@ -80,7 +77,7 @@
          <font>
             <Font size="14.0" />
          </font></Label>
-      <Label layoutX="483.0" layoutY="198.0" prefHeight="20.0" prefWidth="64.0" text="Отчество:">
+      <Label layoutX="503.0" layoutY="198.0" prefHeight="20.0" prefWidth="72.0" text="Отчество:">
          <font>
             <Font size="14.0" />
          </font></Label>
@@ -94,15 +91,27 @@
          <font>
             <Font size="14.0" />
          </font></Label>
-      <Label layoutX="24.0" layoutY="40.0" prefHeight="20.0" prefWidth="112.0" text="Справочник:">
+      <Label fx:id="labelSubRequest" layoutX="25.0" layoutY="77.0" prefHeight="20.0" prefWidth="112.0" text="Подзапрос:">
          <font>
             <Font size="14.0" />
          </font></Label>
-      <ComboBox fx:id="sprValue" layoutX="144.0" layoutY="36.0" prefHeight="25.0" prefWidth="437.0" style="-fx-font-size: 14;" />
+      <ComboBox fx:id="subRequest" layoutX="144.0" layoutY="73.0" prefHeight="28.0" prefWidth="467.0" style="-fx-font-size: 14;" />
       <CheckBox fx:id="sendToBank" layoutX="25.0" layoutY="270.0" mnemonicParsing="false" text="Добавить ЦБ к имени запроса">
          <font>
             <Font size="14.0" />
          </font>
       </CheckBox>
+      <Label layoutX="25.0" layoutY="40.0" prefHeight="20.0" prefWidth="112.0" text="Запрос:">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <DatePicker fx:id="dateSending" layoutX="142.0" layoutY="73.0" prefHeight="28.0" prefWidth="173.0" style="-fx-font-size: 14px;" />
+      <Spinner fx:id="ordinalNumber" layoutX="480.0" layoutY="73.0" prefHeight="28.0" prefWidth="132.0" style="-fx-font-size: 14px;" />
+      <Label fx:id="labelOrdinalNumber" layoutX="412.0" layoutY="78.0" text="Порядок">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

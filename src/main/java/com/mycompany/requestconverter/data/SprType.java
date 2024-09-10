@@ -10,8 +10,8 @@ package com.mycompany.requestconverter.data;
  */
 public enum SprType {
     
-    SPR("spr"),
-    SPR_VD("sprvd");
+    SPR_REGIONS("regions"),
+    SPR_DEPARTMENTS("departments");
     
     private String title;
 

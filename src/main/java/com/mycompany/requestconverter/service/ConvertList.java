@@ -21,39 +21,58 @@ public class ConvertList {
     DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     Date date;
 
-    public static String[][] listToTwoArray(List<String> list) {
-
-        int rows = list.size();
-        int cells = 4;
-        String[][] array = new String[rows][cells];
-        int listIndex = 0;
-        String[] arrayBuf = new String[4];
-        for (int rowIndex = 0; rowIndex < rows; rowIndex++) {
-            arrayBuf = list.get(listIndex++).split(";");
-            for (int cellIndex = 0; cellIndex < arrayBuf.length; cellIndex++) {
-
-                array[rowIndex][cellIndex] = arrayBuf[cellIndex];
-
-            }
-        }
-
-        return array;
-    }
-
-    public List<DataHistory> getDataHistory(List<String> inputList) throws ParseException {
-        List<DataHistory> list = new ArrayList<>();
-        for (int i = 0; i < inputList.size(); i++) {
-            String[] array = new String[3];
-            array = inputList.get(i).split(";");
-            DataHistory dataHistory = new DataHistory();
-            date = df.parse(array[0]);
-            dataHistory.setDate(date);
-            dataHistory.setAction(array[1]);
-            dataHistory.setId(Integer.parseInt(array[2]));
-            list.add(dataHistory);
-        }
-        return list;
-    }
+//    public static String[][] listToTwoArray(List<String> list) {
+//
+//        int rows = list.size();
+//        int cells = 4;
+//        String[][] array = new String[rows][cells];
+//        int listIndex = 0;
+//        String[] arrayBuf = new String[4];
+//        for (int rowIndex = 0; rowIndex < rows; rowIndex++) {
+//            arrayBuf = list.get(listIndex++).split(";");
+//            for (int cellIndex = 0; cellIndex < arrayBuf.length; cellIndex++) {
+//
+//                array[rowIndex][cellIndex] = arrayBuf[cellIndex];
+//
+//            }
+//        }
+//
+//        return array;
+//    }
+    
+//    public static String[][] listToRegions(List<String> list) {
+//
+//        int rows = list.size();
+//        int cells = 2;
+//        String[][] array = new String[rows][cells];
+//        int listIndex = 0;
+//        String[] arrayBuf = new String[];
+//        for (int rowIndex = 0; rowIndex < rows; rowIndex++) {
+//            arrayBuf = list.get(listIndex++).split(";");
+//            for (int cellIndex = 0; cellIndex < arrayBuf.length; cellIndex++) {
+//
+//                array[rowIndex][cellIndex] = arrayBuf[cellIndex];
+//
+//            }
+//        }
+//
+//        return array;
+//    }
+//
+//    public List<DataHistory> getDataHistory(List<String> inputList) throws ParseException {
+//        List<DataHistory> list = new ArrayList<>();
+//        for (int i = 0; i < inputList.size(); i++) {
+//            String[] array = new String[3];
+//            array = inputList.get(i).split(";");
+//            DataHistory dataHistory = new DataHistory();
+//            date = df.parse(array[0]);
+//            dataHistory.setDate(date);
+//            dataHistory.setAction(array[1]);
+//            dataHistory.setId(Integer.parseInt(array[2]));
+//            list.add(dataHistory);
+//        }
+//        return list;
+//    }
     
     
 

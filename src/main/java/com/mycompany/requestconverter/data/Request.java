@@ -4,6 +4,9 @@
  */
 package com.mycompany.requestconverter.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author 041AlikinOS
@@ -12,8 +15,9 @@ public class Request {
 
     private int id;
     private String name;
-    private String shortName;
-
+    private String requestCode;
+    private List<SubRequest> subRequests = new ArrayList<>();
+    
     public Request() {
     }
 
@@ -21,9 +25,9 @@ public class Request {
         this.name = name;
     }
 
-    public Request(String name, String shortName) {
+    public Request(String name, String requestCode) {
         this.name = name;
-        this.shortName = shortName;
+        this.requestCode = requestCode;
     }
 
     public String getName() {
@@ -34,12 +38,12 @@ public class Request {
         this.name = name;
     }
 
-    public String getShortName() {
-        return shortName;
+    public String getRequestCode() {
+        return requestCode;
     }
 
-    public void setShortName(String shortName) {
-        this.shortName = shortName;
+    public void setRequestCode(String requestCode) {
+        this.requestCode = requestCode;
     }
 
     public int getId() {
@@ -47,8 +51,24 @@ public class Request {
     }
 
     public void setId(int id) {
-        this.id = id;
+        if (id > 0) {
+            this.id = id;
+        }
     }
+
+    
+    public List<SubRequest> getSubRequests() {
+        return subRequests;
+    }
+
+    public void setSubRequests(List<SubRequest> subRequests) {
+        this.subRequests = subRequests;
+    }
+    
+    public void addSubRequest(SubRequest subRequest) {
+        this.subRequests.add(subRequest);
+    }
+
 
     @Override
     public String toString() {

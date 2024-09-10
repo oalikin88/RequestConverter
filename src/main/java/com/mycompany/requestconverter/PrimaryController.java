@@ -2,12 +2,14 @@ package com.mycompany.requestconverter;
 
 import com.mycompany.requestconverter.connection.DBConnection;
 import com.mycompany.requestconverter.data.ClientDAO;
-import com.mycompany.requestconverter.data.Record;
 import com.mycompany.requestconverter.data.DataHistory;
+import com.mycompany.requestconverter.data.Department;
+import com.mycompany.requestconverter.data.Region;
 import com.mycompany.requestconverter.data.Request;
 import com.mycompany.requestconverter.data.Settings;
 import com.mycompany.requestconverter.data.Spr;
 import com.mycompany.requestconverter.data.SprType;
+import com.mycompany.requestconverter.data.SubRequest;
 import com.mycompany.requestconverter.service.Content;
 import com.mycompany.requestconverter.service.ConvertList;
 import com.mycompany.requestconverter.service.CustomListManipulation;
@@ -25,16 +27,21 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -55,6 +62,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
@@ -62,6 +70,8 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
@@ -122,7 +132,7 @@ public class PrimaryController {
     private CheckBox remember;
 
     @FXML
-    private ComboBox<String> requestFile;
+    private ComboBox<String> request;
 
     @FXML
     private Button start;
@@ -146,7 +156,7 @@ public class PrimaryController {
     private ChoiceBox<String> choiceSuff;
 
     @FXML
-    private ComboBox<String> sprValue;
+    private ComboBox<String> subRequest;
 
     @FXML
     private ComboBox<String> upfr;
@@ -154,112 +164,152 @@ public class PrimaryController {
     @FXML
     private CheckBox sendToBank;
     
+    @FXML
+    private DatePicker dateSending;
+    
+    @FXML
+    private Spinner ordinalNumber;
+    
+    @FXML
+    private Label labelOrdinalNumber;
+    
+    @FXML
+    private Label labelSubRequest;
+    
     private String fName;
     private List<DataHistory> sprHistory;
     private List<DataHistory> sprVdHistory;
     private List<DataHistory> requests;
-    private List<Record> recordList;
-    private List<Request> requestsList;
+//    private List<Record> recordList;
+    private List<Request> requestsListFromDB;
     private int compareDataHistoryList1;
     private int compareDataHistoryList2;
     private int compareDataHistoryList3;
     private List<String> listSpr;
     private List<String> listSprVd;
-    private List<String> requestList;
-    private ObservableList<String> oListSpr;
-    private List<Record> opfrListSpr;
-    private List<Record> recordsSpr;
-    private List<Record> recordsSprVd;
+    private List<Request> requestList;
+    private List<SubRequest> subRequestList;
+    private ObservableList<String> opfrList;
+//    private List<Record> opfrListSpr;
+    private List<Region> regions;
+    private List<Department> departments;
     private List<String> rList;
-    private ObservableList<String> requestsObserverableList;
+   
     private FileChooser fileChooser;
     private String str;
     private Settings settings;
     private Content content;
     private static Map<String, String> stateCode;
-    private ObservableList<String> sprValueList;
+    private ObservableList<String> requestValueList;
+    private ObservableList<String> subRequestValueList;
     private Spr spr;
     private Spr sprVd;
-    private List<Record> upfrRecords;
+//    private List<Record> upfrRecords;
     private String element;
     private ObservableList<String> upfrList;
     private ObservableList<String> upfrListParentElement;
     private boolean isVd;
     private boolean isVoronezh;
-
+    private IntegerSpinnerValueFactory valueFactory;
+    private Region selectedRegion;
     private Tooltip attention;
 
     @FXML
-    void initialize() throws IOException, URISyntaxException {
+    void initialize() throws IOException, URISyntaxException, ClassNotFoundException, SQLException {
         
         attention = new Tooltip("Поле не может быть пустым, а также не должно содержать следующих знаков: ; * \\ \" | / : ? < >");
         surname.setTooltip(attention);
         fathersName.setTooltip(attention);
         firstName.setTooltip(attention);
         start.disableProperty().set(true);
-        stateCode = new HashMap<>();
-        stateCode.put("Севастополь", "ЗО");
-        stateCode.put("Республика Крым", "ХО");
-        stateCode.put("Ростовская область", "ДНР");
-        stateCode.put("Воронежская область", "ЛНР");
+        dateSending.visibleProperty().set(false);
+        ordinalNumber.setEditable(true);
+        ordinalNumber.visibleProperty().set(false);
+        labelOrdinalNumber.visibleProperty().set(false);
+        remember.visibleProperty().set(false);
+        sendToBank.visibleProperty().set(false);
+        
+//        stateCode = new HashMap<>();
+//        stateCode.put("Севастополь", "ЗО");
+//        stateCode.put("Республика Крым", "ХО");
+//        stateCode.put("Ростовская область", "ДНР");
+//        stateCode.put("Воронежская область", "ЛНР");
 
         content = new Content();
-        spr = new Spr(SprType.SPR);
-        sprVd = new Spr(SprType.SPR_VD);
-
+//        spr = new Spr(SprType.SPR);
+//        sprVd = new Spr(SprType.SPR_VD);
+        if(content.getRequests().size() == 0) {
+            ClientDAO clientDAO = new ClientDAO();
+            List<Request> findAllRequests = clientDAO.findAllRequests();
+            content.writeRequestData(findAllRequests, Content.pathToRequest);
+        }
         requestList = content.getRequests();
+        
+        if(content.getSubRequests().size() == 0) {
+            ClientDAO clientDAO = new ClientDAO();
+            List<SubRequest> findAllSubRequests = clientDAO.findAllSubRequests();
+            content.writeSubRequestData(findAllSubRequests, Content.pathToSubRequest);
+        }
+        subRequestList = content.getSubRequests();
+        requestList = content.finalizeRequest(requestList, subRequestList);
+        String computerName = content.getComputerName();
+        
+
+    
+        
+        
         Task task = new Task() {
             @Override
-            protected Void call() throws Exception {
+            protected Void call() throws Exception { 
 
-                System.out.println("Подключение к базе данных");
-                statusBarInfo.setText("Попытка подключения к базе данных");
-                DBConnection dBConnection = new DBConnection();
-                try ( Connection connection = dBConnection.getConnection()) {
-                    sprHistory = spr.getLastChangeFromHistory();
-                    sprVdHistory = sprVd.getLastChangeFromHistory();
-                    ClientDAO requestHistoryClient = new ClientDAO();
-                    requests = requestHistoryClient.getLastChangeFromRequest();
-                    List<String> sprHistoryStrings = spr.getHistory();
-                    List<String> sprVdHistoryStrings = sprVd.getHistory();
-                    List<String> requestHistoryStrings = content.getRequestHistoryContent();
-
-                    ConvertList convertSprList = new ConvertList();
-                    ConvertList convertSprVdList = new ConvertList();
-                    ConvertList convertRequestList = new ConvertList();
-
-                    List<DataHistory> sprConvertHistory = convertSprList.getDataHistory(sprHistoryStrings);
-                    List<DataHistory> sprVdConvertHistory = convertSprVdList.getDataHistory(sprVdHistoryStrings);
-                    List<DataHistory> requestHistory = convertRequestList.getDataHistory(requestHistoryStrings);
-
-                    compareDataHistoryList1 = DateCompareList.compareDataHistoryList(PrimaryController.this.sprHistory, sprConvertHistory);
-                    compareDataHistoryList3 = DateCompareList.compareDataHistoryList(PrimaryController.this.sprVdHistory, sprVdConvertHistory);
-                    compareDataHistoryList2 = DateCompareList.compareDataHistoryList(requests, requestHistory);
-
-                    if (compareDataHistoryList1 == -1 || compareDataHistoryList2 == -1 || compareDataHistoryList3 == -1) {
-                        Platform.runLater(() -> statusBarInfo.setText("Требуется обновить базу данных"));
-                        Dialog<ButtonType> dialog = new Dialog<>();
-                        DialogPane dialogPane = dialog.getDialogPane();
-                        dialog.setTitle("Сообщение");
-                        dialog.setHeaderText("Доступно обновление базы данных");
-                        dialogPane.setContentText("Вы желаете обновить базу данных?");
-                        dialog.getDialogPane().getButtonTypes().addAll(
-                                new ButtonType("Да", ButtonBar.ButtonData.OK_DONE),
-                                new ButtonType("Нет", ButtonBar.ButtonData.CANCEL_CLOSE));
-                        Optional<ButtonType> result = dialog.showAndWait();
-                        if (result.isPresent()) {
-                            if (result.orElseThrow().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
-                                getUpdate.fire();
-                            }
-                        }
-
-                    } else {
-                        Platform.runLater(() -> statusBarInfo.setText("Готов к работе"));
-                    }
-
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+//                System.out.println("Подключение к базе данных");
+//                statusBarInfo.setText("Попытка подключения к базе данных");
+//                DBConnection dBConnection = new DBConnection();
+//                try ( Connection connection = dBConnection.getConnection()) {
+//                    sprHistory = spr.getLastChangeFromHistory();
+//                    sprVdHistory = sprVd.getLastChangeFromHistory();
+//                    ClientDAO requestHistoryClient = new ClientDAO();
+//                    requests = requestHistoryClient.getLastChangeFromRequest();
+//                    List<String> sprHistoryStrings = spr.getHistory();
+//                    List<String> sprVdHistoryStrings = sprVd.getHistory();
+//                    List<String> requestHistoryStrings = content.getRequestHistoryContent();
+//
+//                    ConvertList convertSprList = new ConvertList();
+//                    ConvertList convertSprVdList = new ConvertList();
+//                    ConvertList convertRequestList = new ConvertList();
+//
+//                    List<DataHistory> sprConvertHistory = convertSprList.getDataHistory(sprHistoryStrings);
+//                    List<DataHistory> sprVdConvertHistory = convertSprVdList.getDataHistory(sprVdHistoryStrings);
+//                    List<DataHistory> requestHistory = convertRequestList.getDataHistory(requestHistoryStrings);
+//
+//                    compareDataHistoryList1 = DateCompareList.compareDataHistoryList(PrimaryController.this.sprHistory, sprConvertHistory);
+//                    compareDataHistoryList3 = DateCompareList.compareDataHistoryList(PrimaryController.this.sprVdHistory, sprVdConvertHistory);
+//                    compareDataHistoryList2 = DateCompareList.compareDataHistoryList(requests, requestHistory);
+//
+//                    if (compareDataHistoryList1 == -1 || compareDataHistoryList2 == -1 || compareDataHistoryList3 == -1) {
+//                        Platform.runLater(() -> statusBarInfo.setText("Требуется обновить базу данных"));
+//                        Dialog<ButtonType> dialog = new Dialog<>();
+//                        DialogPane dialogPane = dialog.getDialogPane();
+//                        dialog.setTitle("Сообщение");
+//                        dialog.setHeaderText("Доступно обновление базы данных");
+//                        dialogPane.setContentText("Вы желаете обновить базу данных?");
+//                        dialog.getDialogPane().getButtonTypes().addAll(
+//                                new ButtonType("Да", ButtonBar.ButtonData.OK_DONE),
+//                                new ButtonType("Нет", ButtonBar.ButtonData.CANCEL_CLOSE));
+//                        Optional<ButtonType> result = dialog.showAndWait();
+//                        if (result.isPresent()) {
+//                            if (result.orElseThrow().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+//                                getUpdate.fire();
+//                            }
+//                        }
+//
+//                    } else {
+//                        Platform.runLater(() -> statusBarInfo.setText("Готов к работе"));
+//                    }
+//
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
                 return null;
             }
 
@@ -271,34 +321,55 @@ public class PrimaryController {
 
         Platform.runLater(task);
 
-        // Обработка requestList            
-        rList = CustomListManipulation.getRequestList(requestList);
-        requestsObserverableList = FXCollections.observableArrayList(rList);
-        requestFile.setItems(requestsObserverableList);
-        requestFile.setValue(requestsObserverableList.get(0));
+        // Обработка requestList
+        
+        requestValueList = FXCollections.observableArrayList(requestList.stream().map(e -> e.getName()).collect(Collectors.toList()));
+        request.setItems(requestValueList);
+        request.setValue(requestValueList.get(0));
+       
+        subRequestValueList = FXCollections.observableArrayList(requestList.get(0).getSubRequests().stream().map(e -> e.getSubRequestName()).collect(Collectors.toList()));
+        if(subRequestValueList.size() == 0) {
+            subRequestValueList.add("Для этого запроса отсутствуют подзапросы");
+        }
+        subRequest.setItems(subRequestValueList);
+        subRequest.setValue(subRequestValueList.get(0));
         menuCloseButton.setOnAction(event -> {
             Platform.exit();
         });
 
         // получение списка ОПФР из общего массива
-        recordsSpr = spr.getRecordsFromLocal();
+        
+        if (content.getRegionsContent().size() == 0) {
+            ClientDAO clientDAO = new ClientDAO();
+            List<Region> findAllRegions = clientDAO.findAllRegions();
+            content.writeRegionData(findAllRegions, Content.pathToRegions);
+        }
 
-        opfrListSpr = CustomListManipulation.getOpfr(recordsSpr);
-        oListSpr = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).sorted((o1, o2) -> o1.compareTo(o2)).collect(Collectors.toList()));
+        regions = content.getRegionsContent().stream().sorted((e1, e2) -> e1.getRegionCode().compareTo(e2.getRegionCode())).collect(Collectors.toList());
 
-        sprValueList = FXCollections.observableArrayList(Spr.getSPR().values());
-        sprValue.setItems(sprValueList);
-        sprValue.setValue(sprValueList.get(0));
+        if (content.getDepartmentsContent().size() == 0) {
+            ClientDAO clientDAO = new ClientDAO();
+            List<Department> findAllDepartments = clientDAO.findAllDepartments();
+            content.writeDepartmentData(findAllDepartments, Content.pathToDepartments);
+        }
 
-        opfr.setItems(oListSpr);
-        opfr.setValue(oListSpr.get(0));
+        departments = content.getDepartmentsContent().stream().sorted((e1, e2) -> e1.getRegionCode().compareTo(e2.getRegionCode())).collect(Collectors.toList());
+        List<Region> finalizeRegions = content.finalizeRegions(regions, departments);
+        opfrList = FXCollections.observableArrayList(finalizeRegions.stream().map(e -> e.getRegionName()).collect(Collectors.toList()));
+ 
+        
+
+        opfr.setItems(opfrList);
+        opfr.setValue(opfrList.get(0));
         element = opfr.getValue();
+    //    List<Region> collect = regions.stream().filter(e -> e.getRegionName().equals(element)).collect(Collectors.toList());
 
         // получение списка УПФР из общего массива
-        upfrRecords = CustomListManipulation.getUpfrList(recordsSpr, element);
-        upfrList = FXCollections.observableArrayList(upfrRecords.stream().map(e -> e.getName()).collect(Collectors.toList()));
-        upfrListParentElement = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element)).map(m -> m.getName()).collect(Collectors.toSet()));
-        upfrList.addAll(upfrListParentElement);
+        List<Department> deps = finalizeRegions.get(0).getDepartments();
+       // upfrRecords = CustomListManipulation.getUpfrList(recordsSpr, element);
+        upfrList = FXCollections.observableArrayList(deps.stream().map(e -> e.getDepartmentName()).collect(Collectors.toList()));
+     //   upfrListParentElement = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element)).map(m -> m.getName()).collect(Collectors.toSet()));
+      //  upfrList.addAll(upfrListParentElement);
         upfr.setItems(upfrList);
         upfr.setValue(upfrList.get(0));
 
@@ -311,22 +382,89 @@ public class PrimaryController {
                 element2 = opfr.getItems().get(0);
             }
 
+            selectedRegion = regions.stream().filter(e -> e.getRegionName().equals(element2)).collect(Collectors.toList()).get(0);
             // получение списка упфр при смене элемента в choicebox ОПФР
-            List<Record> target = CustomListManipulation.getUpfrList(recordsSpr, element2);
+         //   List<Record> target = CustomListManipulation.getUpfrList(recordsSpr, element2);
             ObservableList<String> upfrList2 = null;
             ObservableList<String> upfrList1 = null;
-
-            upfrList2 = FXCollections.observableArrayList(target.stream().map(e -> e.getName()).collect(Collectors.toList()));
+            if(selectedRegion.getDepartments().isEmpty()) {
+                upfrList2 = FXCollections.observableArrayList(Arrays.asList("Отсутствуют районы для выбранного региона"));
+            } else {
+                upfrList2 = FXCollections.observableArrayList(selectedRegion.getDepartments().stream().map(e -> e.getDepartmentName()).collect(Collectors.toList()));
+            }
+            
             //Подгрузка в список кодировок УПФРов родительского элемента ОПФР 
-            upfrList1 = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element2)).map(m -> m.getName()).collect(Collectors.toSet()));
-            upfrList2.addAll(upfrList1);
+            //upfrList1 = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element2)).map(m -> m.getName()).collect(Collectors.toSet()));
+            //upfrList2.addAll(upfrList1);
 
             upfr.setItems(upfrList2);
             if (upfrList2 != null) {
                 upfr.setValue(upfrList2.get(0));
             }
         }
+                
+        
+                
         );
+        
+        request.setOnAction(event -> {
+            String element2;
+            if (null != request.getSelectionModel().getSelectedItem()) {
+                element2 = request.getSelectionModel().getSelectedItem();
+
+            } else {
+                element2 = request.getItems().get(0);
+            }
+
+            Request selectedRequest = requestList.stream().filter(e -> e.getName().equals(element2)).collect(Collectors.toList()).get(0);
+            // получение списка упфр при смене элемента в choicebox ОПФР
+         //   List<Record> target = CustomListManipulation.getUpfrList(recordsSpr, element2);
+            ObservableList<String> subrequestList = null;
+
+            subrequestList = FXCollections.observableArrayList(selectedRequest.getSubRequests().stream().map(e -> e.getSubRequestName()).collect(Collectors.toList()));
+            //Подгрузка в список кодировок УПФРов родительского элемента ОПФР 
+            //upfrList1 = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element2)).map(m -> m.getName()).collect(Collectors.toSet()));
+            //upfrList2.addAll(upfrList1);
+            if(subrequestList.size() == 0) {
+                subrequestList.add("Для этого запроса отсутствуют подзапросы");
+            }
+            if(request.getValue().contains("(сул_045)")) {
+                subRequest.visibleProperty().set(false);
+                dateSending.setValue(null);
+                dateSending.visibleProperty().set(true);
+                labelSubRequest.setText("Дата отправки:");
+                labelOrdinalNumber.visibleProperty().set(true);
+                ordinalNumber.getEditor().clear();
+                valueFactory = new IntegerSpinnerValueFactory(0, 999999);
+                ordinalNumber.setValueFactory(valueFactory);
+                ordinalNumber.visibleProperty().set(true);
+                
+            } else {
+                ordinalNumber.visibleProperty().set(false);
+                ordinalNumber.getEditor().clear();
+                labelOrdinalNumber.visibleProperty().set(false);
+                dateSending.visibleProperty().set(false);
+                dateSending.setValue(null);
+                subRequest.visibleProperty().set(true);
+                labelSubRequest.setText("Подзапрос:");
+                
+            }
+            
+            
+            
+            
+//            subRequest.visibleProperty().bind(
+//                Bindings.equal("дат", request.getSelectionModel().selectedItemProperty()));
+            
+            
+//            if(selectedRequest.getRequestCode().equals("дат")) {
+//                subRequest.visibleProperty().set(false);
+//            }
+            subRequest.setItems(subrequestList);
+           
+                subRequest.setValue(subrequestList.get(0));
+            
+        });
 
         surname.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.ENTER) {
@@ -398,94 +536,94 @@ public class PrimaryController {
                  );
 
 
-        sprValue.getSelectionModel().selectedItemProperty().addListener((Override, t, t1) -> {
-            if (t1.contains(sprValueList.get(1))) {
-                recordsSprVd = sprVd.getRecordsFromLocal();
-                opfrListSpr = CustomListManipulation.getOpfr(recordsSprVd);
-                oListSpr = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).sorted((o1, o2) -> o1.compareTo(o2)).collect(Collectors.toList()));
-                //opfr.getItems().addAll(oListSprVd);
-                opfr.setItems(oListSpr);
-
-                opfr.setValue(oListSpr.get(0));
-                element = opfr.getValue();
-                upfrRecords = CustomListManipulation.getUpfrList(recordsSprVd, element);
-                upfrList = FXCollections.observableArrayList(upfrRecords.stream().map(e -> e.getName()).collect(Collectors.toList()));
-                upfrListParentElement = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element)).map(m -> m.getName()).collect(Collectors.toSet()));
-                upfrList.addAll(upfrListParentElement);
-                upfr.setItems(upfrList);
-                upfr.setValue(upfrList.get(0));
-
-                opfr.setOnAction(event -> {
-                    String element2;
-                    if (null != opfr.getSelectionModel().getSelectedItem()) {
-                        element2 = opfr.getSelectionModel().getSelectedItem();
-
-                    } else {
-                        element2 = opfr.getItems().get(0);
-                    }
-
-                    // получение списка упфр при смене элемента в choicebox ОПФР
-                    List<Record> target = CustomListManipulation.getUpfrList(recordsSprVd, element2);
-                    ObservableList<String> upfrList2 = null;
-                    ObservableList<String> upfrList1 = null;
-
-                    upfrList2 = FXCollections.observableArrayList(target.stream().map(e -> e.getName()).collect(Collectors.toList()));
-                    //Подгрузка в список кодировок УПФРов родительского элемента ОПФР 
-                    upfrList1 = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element2)).map(m -> m.getName()).collect(Collectors.toSet()));
-                    upfrList2.addAll(upfrList1);
-
-                    upfr.setItems(upfrList2);
-                    if (upfrList2 != null) {
-                        upfr.setValue(upfrList2.get(0));
-                    }
-                }
-                );
-
-            } else {
-
-                opfrListSpr = CustomListManipulation.getOpfr(recordsSpr);
-                oListSpr = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).collect(Collectors.toList()));
-                opfr.setItems(oListSpr);
-                opfr.setValue(oListSpr.get(0));
-                element = opfr.getValue();
-                upfrRecords = CustomListManipulation.getUpfrList(recordsSpr, element);
-                upfrList = FXCollections.observableArrayList(upfrRecords.stream().map(e -> e.getName()).collect(Collectors.toList()));
-                upfrListParentElement = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element)).map(m -> m.getName()).collect(Collectors.toSet()));
-                upfrList.addAll(upfrListParentElement);
-                upfr.setItems(upfrList);
-                upfr.setValue(upfrList.get(0));
-
-                opfr.setOnAction(event -> {
-                    String element2;
-                    if (null != opfr.getSelectionModel().getSelectedItem()) {
-                        element2 = opfr.getSelectionModel().getSelectedItem();
-                    } else {
-                        element2 = opfr.getItems().get(0);
-                    }
-                    // получение списка упфр при смене элемента в choicebox ОПФР
-                    List<Record> target = CustomListManipulation.getUpfrList(recordsSpr, element2);
-                    ObservableList<String> upfrList2 = null;
-                    ObservableList<String> upfrList1 = null;
-
-                    upfrList2 = FXCollections.observableArrayList(target.stream().map(e -> e.getName()).collect(Collectors.toList()));
-                    //Подгрузка в список кодировок УПФРов родительского элемента ОПФР 
-                    upfrList1 = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element2)).map(m -> m.getName()).collect(Collectors.toSet()));
-                    upfrList2.addAll(upfrList1);
-
-                    upfr.setItems(upfrList2);
-                    if (upfrList2 != null) {
-                        upfr.setValue(upfrList2.get(0));
-                    }
-                }
-                );
-
-            }
-        });
+//        request.getSelectionModel().selectedItemProperty().addListener((Override, t, t1) -> {
+//            if (t1.contains(requestValueList.get(1))) {
+//                recordsSprVd = sprVd.getRecordsFromLocal();
+//                opfrListSpr = CustomListManipulation.getOpfr(recordsSprVd);
+//                opfrList = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).sorted((o1, o2) -> o1.compareTo(o2)).collect(Collectors.toList()));
+//                //opfr.getItems().addAll(oListSprVd);
+//                opfr.setItems(opfrList);
+//
+//                opfr.setValue(opfrList.get(0));
+//                element = opfr.getValue();
+//                upfrRecords = CustomListManipulation.getUpfrList(recordsSprVd, element);
+//                upfrList = FXCollections.observableArrayList(upfrRecords.stream().map(e -> e.getName()).collect(Collectors.toList()));
+//                upfrListParentElement = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element)).map(m -> m.getName()).collect(Collectors.toSet()));
+//                upfrList.addAll(upfrListParentElement);
+//                upfr.setItems(upfrList);
+//                upfr.setValue(upfrList.get(0));
+//
+//                opfr.setOnAction(event -> {
+//                    String element2;
+//                    if (null != opfr.getSelectionModel().getSelectedItem()) {
+//                        element2 = opfr.getSelectionModel().getSelectedItem();
+//
+//                    } else {
+//                        element2 = opfr.getItems().get(0);
+//                    }
+//
+//                    // получение списка упфр при смене элемента в choicebox ОПФР
+//                    List<Record> target = CustomListManipulation.getUpfrList(recordsSprVd, element2);
+//                    ObservableList<String> upfrList2 = null;
+//                    ObservableList<String> upfrList1 = null;
+//
+//                    upfrList2 = FXCollections.observableArrayList(target.stream().map(e -> e.getName()).collect(Collectors.toList()));
+//                    //Подгрузка в список кодировок УПФРов родительского элемента ОПФР 
+//                    upfrList1 = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element2)).map(m -> m.getName()).collect(Collectors.toSet()));
+//                    upfrList2.addAll(upfrList1);
+//
+//                    upfr.setItems(upfrList2);
+//                    if (upfrList2 != null) {
+//                        upfr.setValue(upfrList2.get(0));
+//                    }
+//                }
+//                );
+//
+//            } else {
+//
+//                opfrListSpr = CustomListManipulation.getOpfr(recordsSpr);
+//                opfrList = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).collect(Collectors.toList()));
+//                opfr.setItems(opfrList);
+//                opfr.setValue(opfrList.get(0));
+//                element = opfr.getValue();
+//                upfrRecords = CustomListManipulation.getUpfrList(recordsSpr, element);
+//                upfrList = FXCollections.observableArrayList(upfrRecords.stream().map(e -> e.getName()).collect(Collectors.toList()));
+//                upfrListParentElement = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element)).map(m -> m.getName()).collect(Collectors.toSet()));
+//                upfrList.addAll(upfrListParentElement);
+//                upfr.setItems(upfrList);
+//                upfr.setValue(upfrList.get(0));
+//
+//                opfr.setOnAction(event -> {
+//                    String element2;
+//                    if (null != opfr.getSelectionModel().getSelectedItem()) {
+//                        element2 = opfr.getSelectionModel().getSelectedItem();
+//                    } else {
+//                        element2 = opfr.getItems().get(0);
+//                    }
+//                    // получение списка упфр при смене элемента в choicebox ОПФР
+//                    List<Record> target = CustomListManipulation.getUpfrList(recordsSpr, element2);
+//                    ObservableList<String> upfrList2 = null;
+//                    ObservableList<String> upfrList1 = null;
+//
+//                    upfrList2 = FXCollections.observableArrayList(target.stream().map(e -> e.getName()).collect(Collectors.toList()));
+//                    //Подгрузка в список кодировок УПФРов родительского элемента ОПФР 
+//                    upfrList1 = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element2)).map(m -> m.getName()).collect(Collectors.toSet()));
+//                    upfrList2.addAll(upfrList1);
+//
+//                    upfr.setItems(upfrList2);
+//                    if (upfrList2 != null) {
+//                        upfr.setValue(upfrList2.get(0));
+//                    }
+//                }
+//                );
+//
+//            }
+//        });
 
         // Работа с суффиксом
-        ObservableList<String> observableArrayKeys = FXCollections.observableArrayList(stateCode.values().stream().collect(Collectors.toList()));
-        choiceSuff.setItems(observableArrayKeys);
-        choiceSuff.setValue(choiceSuff.getItems().get(0));
+//        ObservableList<String> observableArrayKeys = FXCollections.observableArrayList(stateCode.values().stream().collect(Collectors.toList()));
+//        choiceSuff.setItems(observableArrayKeys);
+//        choiceSuff.setValue(choiceSuff.getItems().get(0));
 
     }
 
@@ -578,6 +716,10 @@ public class PrimaryController {
                         Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (URISyntaxException ex) {
                         Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 });
             }
@@ -633,14 +775,62 @@ public class PrimaryController {
         String sName = surname.getText();
         // Получение кода района
         String val;
-        if (sprValue.getValue().equals("Запросы выплатных дел")) {
-            val = RequestFormirovationService.getRequestCode(sprVd.getInputContent(), opfr.getValue(), upfr.getValue());
-            isVd = true;
+        String dep = "";
+        
+        Region selectedReg = regions.stream().filter(e -> e.getRegionName().equals(opfr.getValue())).collect(Collectors.toList()).get(0);
+        if(selectedReg.getDepartments().isEmpty()) {
+            val = selectedReg.getRegionCode();
         } else {
-            val = RequestFormirovationService.getRequestCode(spr.getInputContent(), opfr.getValue(), upfr.getValue());
-            isVd = false;
+         Department resultDepartment = departments.stream().filter(e -> e.getDepartmentName().equals(upfr.getValue())).collect(Collectors.toList()).get(0);
+        val = resultDepartment.getRegionCode();
+        dep = resultDepartment.getDepartmentCode();
+        }
+        
+//        if (request.getValue().equals("Запросы выплатных дел")) {
+//            val = RequestFormirovationService.getRequestCode(sprVd.getInputContent(), opfr.getValue(), upfr.getValue());
+//            isVd = true;
+//        } else {
+//            val = RequestFormirovationService.getRequestCode(spr.getInputContent(), opfr.getValue(), upfr.getValue());
+//            isVd = false;
+//        }
+        Request resultRequest = requestList.stream()
+                .filter(e -> e.getName()
+                        .equals(request.getValue()))
+                .collect(Collectors.toList())
+                .get(0);
+        
+        
+        if(resultRequest.getSubRequests().size() > 0 && null == dateSending.getValue()) {
+            SubRequest resultSubRequest = resultRequest.getSubRequests()
+                    .stream()
+                    .filter(e -> e.getSubRequestName()
+                            .equals(subRequest.getValue()))
+                    .collect(Collectors.toList())
+                    .get(0);
+           
+            val = val + dep + "_" + resultRequest.getRequestCode() + "_" + resultSubRequest.getSubRequestCode();
+        } else if(null != dateSending.getValue()) {
+            String day;
+            String month;
+            if(dateSending.getValue().getDayOfMonth() < 10) {
+                day = "0" + dateSending.getValue().getDayOfMonth();
+            } else {
+                day = "" + dateSending.getValue().getDayOfMonth();
+            }
+            
+            if(dateSending.getValue().getMonthValue() < 10) {
+                month = "0" + dateSending.getValue().getMonthValue();
+            } else {
+                month = "" + dateSending.getValue().getMonthValue();
+            }
+            val = val + "_" + resultRequest.getRequestCode() + "_" + day + month
+                    + "_" + ordinalNumber.getEditor().getText();
+                  
+        } else {
+            val = val + dep + "_" + resultRequest.getRequestCode();
         }
 
+        
         // Получение пути сохранения файла
         StringBuilder out = new StringBuilder();
         out.delete(0, out.length());
@@ -667,11 +857,11 @@ public class PrimaryController {
             out.append("(ЦБ)");
         }
         
-        out.append("_");
+       // out.append("_");
         if (remember.selectedProperty().getValue()) {
             out.append("(н)");
         }
-        out.append(RequestFormirovationService.getRequestValue(requestList, requestFile.getValue()));
+        //out.append(RequestFormirovationService.getRequestValue(requestList, requestFile.getValue()));
 
         //if
         if (choiceSuff.isVisible()) {
@@ -711,72 +901,72 @@ public class PrimaryController {
     @FXML
     void actionGetUpdate(ActionEvent event) throws IOException, URISyntaxException, ClassNotFoundException, SQLException {
 
-        if (compareDataHistoryList1 == -1) {
-
-            // подумать как автоматически подтягивать нужный справочник
-            List<Record> inputFromSprDB = spr.getRecordsFromDB();
-
-            spr.writeSpr(inputFromSprDB);
-            spr.writeHistory(sprHistory);
-            Platform.runLater(() -> statusBarInfo.setText("База данных успешно обновлена"));
-            recordsSpr = spr.getRecordsFromLocal();
-            opfrListSpr = CustomListManipulation.getOpfr(recordsSpr);
-            oListSpr = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).collect(Collectors.toList()));
-            opfr.setItems(oListSpr);
-            opfr.setValue(oListSpr.get(0));
-            Platform.runLater(() -> {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                statusBarInfo.setText("Готов к работе");
-            });
-        }
-
-        if (compareDataHistoryList3 == -1) {
-
-            List<Record> inputFromSprVdDB = sprVd.getRecordsFromDB();
-            sprVd.writeSpr(inputFromSprVdDB);
-            sprVd.writeHistory(sprVdHistory);
-
-            Platform.runLater(() -> statusBarInfo.setText("База данных успешно обновлена"));
-            recordsSprVd = sprVd.getRecordsFromLocal();
-            opfrListSpr = CustomListManipulation.getOpfr(recordsSprVd);
-            oListSpr = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).collect(Collectors.toList()));
-            opfr.setItems(oListSpr);
-            opfr.setValue(oListSpr.get(0));
-            Platform.runLater(() -> {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                statusBarInfo.setText("Готов к работе");
-            });
-        }
-
-        if (compareDataHistoryList2 == -1) {
-
-            ClientDAO client = new ClientDAO();
-            requestsList = client.findAllRequests();
-            content.writeRequestData(requestsList);
-            content.writeRequestHistory(requests);
-            Platform.runLater(() -> statusBarInfo.setText("База данных успешно обновлена"));
-            requestList = content.getRequests();
-            rList = CustomListManipulation.getRequestList(requestList);
-            requestsObserverableList = FXCollections.observableArrayList(rList);
-            requestFile.setItems(requestsObserverableList);
-            requestFile.setValue(requestsObserverableList.get(0));
-            Platform.runLater(() -> {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                statusBarInfo.setText("Готов к работе");
-            });
-        }
+//        if (compareDataHistoryList1 == -1) {
+//
+//            // подумать как автоматически подтягивать нужный справочник
+//            List<Record> inputFromSprDB = spr.getRecordsFromDB();
+//
+//            spr.writeSpr(inputFromSprDB);
+//            spr.writeHistory(sprHistory);
+//            Platform.runLater(() -> statusBarInfo.setText("База данных успешно обновлена"));
+//            recordsSpr = spr.getRecordsFromLocal();
+//            opfrListSpr = CustomListManipulation.getOpfr(recordsSpr);
+//            opfrList = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).collect(Collectors.toList()));
+//            opfr.setItems(opfrList);
+//            opfr.setValue(opfrList.get(0));
+//            Platform.runLater(() -> {
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//                statusBarInfo.setText("Готов к работе");
+//            });
+//        }
+//
+//        if (compareDataHistoryList3 == -1) {
+//
+//            List<Record> inputFromSprVdDB = sprVd.getRecordsFromDB();
+//            sprVd.writeSpr(inputFromSprVdDB);
+//            sprVd.writeHistory(sprVdHistory);
+//
+//            Platform.runLater(() -> statusBarInfo.setText("База данных успешно обновлена"));
+//            recordsSprVd = sprVd.getRecordsFromLocal();
+//            opfrListSpr = CustomListManipulation.getOpfr(recordsSprVd);
+//            opfrList = FXCollections.observableArrayList(opfrListSpr.stream().map(e -> e.getName()).collect(Collectors.toList()));
+//            opfr.setItems(opfrList);
+//            opfr.setValue(opfrList.get(0));
+//            Platform.runLater(() -> {
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//                statusBarInfo.setText("Готов к работе");
+//            });
+//        }
+//
+//        if (compareDataHistoryList2 == -1) {
+//
+//            ClientDAO client = new ClientDAO();
+//            requestsListFromDB = client.findAllRequests();
+//            content.writeRequestData(requestsListFromDB);
+//            content.writeRequestHistory(requests);
+//            Platform.runLater(() -> statusBarInfo.setText("База данных успешно обновлена"));
+//            requestList = content.getRequests();
+//            rList = CustomListManipulation.getRequestList(requestList);
+//            subRequestValueList = FXCollections.observableArrayList(rList);
+//            requestFile.setItems(subRequestValueList);
+//            requestFile.setValue(subRequestValueList.get(0));
+//            Platform.runLater(() -> {
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(PrimaryController.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//                statusBarInfo.setText("Готов к работе");
+//            });
+//        }
     }
 
     @FXML

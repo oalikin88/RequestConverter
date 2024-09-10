@@ -30,15 +30,14 @@ public class RequestFormirovationService {
         String buffer = "";
         
          for (int i = 0; i < array.length; i++) {
-                for (int j = 0; j < 4; j++) {
+                for (int j = 3; j < 4; j++) {
                     if(array[i][j].toLowerCase().trim().equals(opfr.toLowerCase().trim())){
                         buffer = array[i][j-3];
                     }}}
          for (int i = 0; i < array.length; i++) {
-                for (int j = 0; j < 4; j++) {
+                for (int j = 3; j < 4; j++) {
                     if (array[i][j].toLowerCase().trim().equals(upfr.toLowerCase().trim()) && array[i][j-3].trim().equals(buffer.trim())) {
                         s += array[i][j - 3];
-                        s += array[i][j - 2];
                         s += array[i][j - 1];
 
                         

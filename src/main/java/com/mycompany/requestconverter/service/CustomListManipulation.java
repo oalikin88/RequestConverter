@@ -4,10 +4,10 @@
  */
 package com.mycompany.requestconverter.service;
 
-import com.mycompany.requestconverter.data.Record;
+import com.mycompany.requestconverter.data.Region;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.scene.control.TreeItem;
+import java.util.Set;
 
 /**
  *
@@ -26,112 +26,104 @@ public class CustomListManipulation {
 
         return list;
     }
-    
-    public static List<Record> getRecords(String[][] array) {
-        
-        List<Record> records = new ArrayList<>();
-        for (int i = 0; i < array.length; i++) {
-            Record record = new Record();
-            for (int j = 0; j < 4; j++) {
-                
-                record.setSubject(array[i][0].trim());
-                record.setOpfr(array[i][1].trim());
-                record.setUpfr(array[i][2].trim());
-                record.setName(array[i][3].trim());
-                
-            }
-            records.add(record);
-            }
-        
-        
-        
-    return records;
-    }
-    
-    
-    public static List<Record> getOpfr(List<Record> inputList) {
-    
-        
-
-        List<Record> parentsList = new ArrayList<>();
-
-        for (int i = 0; i < inputList.size(); i++) {
-            if (inputList.get(i).getOpfr().equals("000") && inputList.get(i).getUpfr().equals("000")) {
-                parentsList.add(inputList.get(i));
-            }
-        }     
-        return parentsList;
-    }
-    
-    public static List<String> getOpfrNames(List<Record> inputList) {
-        
-        List<String> list = new ArrayList<>();
-        for(Record value : inputList) {
-            list.add(value.getOpfr());
-        }
-
-        return list;
-    }
-    
-    
-    // получение списка ОПФР из общего массива
-    public static List<String> getOpfrList(String[][] array) {
-        List<String> list = new ArrayList<>();
-
-        for (int i = 0; i < array.length; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (array[i][1].equals("000") && array[i][2].equals("000")) {
-                    list.add(array[i][3]);
-
-                }
-            }
-        }
-        return list;
-    }
-    // получение списка УПФР из общего массива
-    public static List<Record> getUpfrList(List<Record> inputList, String element) {
-        
-        Record record = new Record();
-        List<Record> records = new ArrayList<>();
-        
-        for(int i = 0; i < inputList.size(); i++) {
-            if(inputList.get(i).getName().equals(element)) {
-                record = inputList.get(i);
-            }
-        }
-        
-   
-            for (int j = 0; j < inputList.size(); j++) {
-                if (inputList.get(j).getSubject().equals(record.getSubject())
-                        && (!inputList.get(j).getOpfr().equals(record.getOpfr())
-                        || !inputList.get(j).getUpfr().equals(record.getUpfr()))) {
-                    records.add(inputList.get(j));
-                }
-            }
-            return records;
-        }
-        
-    
-    // получение списка УПФР при изменении элемента в choicebox ОПФР
-    public static List<String> getChangeUpfrList(String[][] array, String target) {
-
-        String buf = "";
-        List<String> list = new ArrayList<>();
-        
-        for (int i = 0; i < array.length; i++) {
-            if (array[i][3].equals(target)) {
-                buf = array[i][0];
-            }
-        }
-
-        for (int i = 0; i < array.length; i++) {
-            if (array[i][0].equals(buf) && !array[i][2].equals("000")) {
-
-                list.add(array[i][3]);
-            }
-        }
-
-        return list;
-    }
+//    
+//    public static Set<Region> getRegions(List<String> input) {
+//        
+//        List<Record> records = new ArrayList<>();
+//        for (int i = 0; i < array.length; i++) {
+//            Record record = new Record();
+//            for (int j = 0; j < 3; j++) {
+//                
+//                record.setSubject(array[i][0].trim());
+//                record.setUpfr(array[i][1].trim());
+//                record.setName(array[i][2].trim());
+//                
+//            }
+//            records.add(record);
+//            }
+//        
+//        
+//        
+//    return records;
+//    }
+//    
+//    
+//    public static List<Record> getOpfr(List<Record> inputList) {
+//    
+//        
+//
+//        List<Record> parentsList = new ArrayList<>();
+//
+//        for (int i = 0; i < inputList.size(); i++) {
+//            if (inputList.get(i).getUpfr().equals("000")) {
+//                parentsList.add(inputList.get(i));
+//            }
+//        }     
+//        return parentsList;
+//    }
+//    
+//    public static List<String> getOpfrNames(List<Record> inputList) {
+//        
+//        List<String> list = new ArrayList<>();
+//        for(Record value : inputList) {
+//            list.add(value.getSubject());
+//        }
+//
+//        return list;
+//    }
+//    
+//    
+//    // получение списка ОПФР из общего массива
+//    public static List<String> getOpfrList(String[][] array) {
+//        List<String> list = new ArrayList<>();
+//
+//        for (int i = 0; i < array.length; i++) {
+//            for (int j = 0; j < 4; j++) {
+//                if (array[i][1].equals("000")) {
+//                    list.add(array[i][2]);
+//
+//                }
+//            }
+//        }
+//        return list;
+//    }
+//    // получение списка УПФР из общего массива
+//    public static List<Record> getUpfrList(List<Record> inputList, String element) {
+//        
+//        Record record = new Record();
+//        List<Record> records = new ArrayList<>();
+//        
+//        for(int i = 0; i < inputList.size(); i++) {
+//            if(inputList.get(i).getSubject().equals(element) && !inputList.get(i).getSubject().equals("000")) {
+//                record = inputList.get(i);
+//                records.add(record);
+//            }
+//        }
+//
+//            return records;
+//        }
+//        
+//    
+//    // получение списка УПФР при изменении элемента в choicebox ОПФР
+//    public static List<String> getChangeUpfrList(String[][] array, String target) {
+//
+//        String buf = "";
+//        List<String> list = new ArrayList<>();
+//        
+//        for (int i = 0; i < array.length; i++) {
+//            if (array[i][3].equals(target)) {
+//                buf = array[i][0];
+//            }
+//        }
+//
+//        for (int i = 0; i < array.length; i++) {
+//            if (array[i][0].equals(buf) && !array[i][1].equals("000")) {
+//
+//                list.add(array[i][2]);
+//            }
+//        }
+//
+//        return list;
+//    }
 
 }
