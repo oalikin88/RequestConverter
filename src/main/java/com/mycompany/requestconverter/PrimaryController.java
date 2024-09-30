@@ -1,20 +1,13 @@
 package com.mycompany.requestconverter;
 
-import com.mycompany.requestconverter.connection.DBConnection;
 import com.mycompany.requestconverter.data.ClientDAO;
 import com.mycompany.requestconverter.data.DataHistory;
 import com.mycompany.requestconverter.data.Department;
 import com.mycompany.requestconverter.data.Region;
 import com.mycompany.requestconverter.data.Request;
 import com.mycompany.requestconverter.data.Settings;
-import com.mycompany.requestconverter.data.Spr;
-import com.mycompany.requestconverter.data.SprType;
 import com.mycompany.requestconverter.data.SubRequest;
 import com.mycompany.requestconverter.service.Content;
-import com.mycompany.requestconverter.service.ConvertList;
-import com.mycompany.requestconverter.service.CustomListManipulation;
-import com.mycompany.requestconverter.service.DateCompareList;
-import com.mycompany.requestconverter.service.RequestFormirovationService;
 import com.mycompany.requestconverter.service.ZipFileService;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,24 +17,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -60,7 +47,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
@@ -109,6 +95,9 @@ public class PrimaryController {
 
     @FXML
     private Label fileNameView;
+    
+    @FXML
+    private Label surnameLabel;
 
     @FXML
     private Label showFileSavePath;
@@ -116,6 +105,9 @@ public class PrimaryController {
     @FXML
     private TextField firstName;
 
+    @FXML
+    private TextField snils;
+    
     @FXML
     private MenuBar menu;
 
@@ -128,8 +120,7 @@ public class PrimaryController {
     @FXML
     private ComboBox<String> opfr;
 
-    @FXML
-    private CheckBox remember;
+ 
 
     @FXML
     private ComboBox<String> request;
@@ -153,7 +144,7 @@ public class PrimaryController {
     private Label labelSuff;
 
     @FXML
-    private ChoiceBox<String> choiceSuff;
+    private TextField departmentNumber;
 
     @FXML
     private ComboBox<String> subRequest;
@@ -175,6 +166,9 @@ public class PrimaryController {
     
     @FXML
     private Label labelSubRequest;
+    
+    @FXML
+    private Label departmentNumberLabel;
     
     private String fName;
     private List<DataHistory> sprHistory;
@@ -202,18 +196,14 @@ public class PrimaryController {
     private static Map<String, String> stateCode;
     private ObservableList<String> requestValueList;
     private ObservableList<String> subRequestValueList;
-    private Spr spr;
-    private Spr sprVd;
 //    private List<Record> upfrRecords;
     private String element;
     private ObservableList<String> upfrList;
     private ObservableList<String> upfrListParentElement;
-    private boolean isVd;
-    private boolean isVoronezh;
     private IntegerSpinnerValueFactory valueFactory;
     private Region selectedRegion;
     private Tooltip attention;
-
+    private boolean vdeksLNR;
     @FXML
     void initialize() throws IOException, URISyntaxException, ClassNotFoundException, SQLException {
         
@@ -223,21 +213,18 @@ public class PrimaryController {
         firstName.setTooltip(attention);
         start.disableProperty().set(true);
         dateSending.visibleProperty().set(false);
+        departmentNumberLabel.visibleProperty().set(false);
+        departmentNumber.visibleProperty().set(false);
         ordinalNumber.setEditable(true);
         ordinalNumber.visibleProperty().set(false);
         labelOrdinalNumber.visibleProperty().set(false);
-        remember.visibleProperty().set(false);
         sendToBank.visibleProperty().set(false);
-        
-//        stateCode = new HashMap<>();
-//        stateCode.put("Севастополь", "ЗО");
-//        stateCode.put("Республика Крым", "ХО");
-//        stateCode.put("Ростовская область", "ДНР");
-//        stateCode.put("Воронежская область", "ЛНР");
+        snils.visibleProperty().set(false);
+        snils.setPromptText("XXX-XXX-XXX XX");
+
 
         content = new Content();
-//        spr = new Spr(SprType.SPR);
-//        sprVd = new Spr(SprType.SPR_VD);
+
         if(content.getRequests().size() == 0) {
             ClientDAO clientDAO = new ClientDAO();
             List<Request> findAllRequests = clientDAO.findAllRequests();
@@ -322,7 +309,7 @@ public class PrimaryController {
         Platform.runLater(task);
 
         // Обработка requestList
-        
+        Pattern inputTextFieldPattern = Pattern.compile("[;*\"|/:?<>]");
         requestValueList = FXCollections.observableArrayList(requestList.stream().map(e -> e.getName()).collect(Collectors.toList()));
         request.setItems(requestValueList);
         request.setValue(requestValueList.get(0));
@@ -408,6 +395,7 @@ public class PrimaryController {
         );
         
         request.setOnAction(event -> {
+            
             String element2;
             if (null != request.getSelectionModel().getSelectedItem()) {
                 element2 = request.getSelectionModel().getSelectedItem();
@@ -417,10 +405,15 @@ public class PrimaryController {
             }
 
             Request selectedRequest = requestList.stream().filter(e -> e.getName().equals(element2)).collect(Collectors.toList()).get(0);
+            if(selectedRequest.getRequestCode().equals("вдэкс") && selectedRequest.getName().contains("ЛНР")) {
+                vdeksLNR = true;
+            } else {
+                vdeksLNR = false;
+            }
             // получение списка упфр при смене элемента в choicebox ОПФР
          //   List<Record> target = CustomListManipulation.getUpfrList(recordsSpr, element2);
             ObservableList<String> subrequestList = null;
-
+            
             subrequestList = FXCollections.observableArrayList(selectedRequest.getSubRequests().stream().map(e -> e.getSubRequestName()).collect(Collectors.toList()));
             //Подгрузка в список кодировок УПФРов родительского элемента ОПФР 
             //upfrList1 = FXCollections.observableArrayList(opfrListSpr.stream().filter(e -> e.getName().contains(element2)).map(m -> m.getName()).collect(Collectors.toSet()));
@@ -428,27 +421,334 @@ public class PrimaryController {
             if(subrequestList.size() == 0) {
                 subrequestList.add("Для этого запроса отсутствуют подзапросы");
             }
-            if(request.getValue().contains("(сул_045)")) {
-                subRequest.visibleProperty().set(false);
-                dateSending.setValue(null);
-                dateSending.visibleProperty().set(true);
-                labelSubRequest.setText("Дата отправки:");
-                labelOrdinalNumber.visibleProperty().set(true);
-                ordinalNumber.getEditor().clear();
-                valueFactory = new IntegerSpinnerValueFactory(0, 999999);
-                ordinalNumber.setValueFactory(valueFactory);
-                ordinalNumber.visibleProperty().set(true);
+            
+            String selectedReqCode = requestList.stream().filter(e -> e.getName().equals(request.getSelectionModel().getSelectedItem())).collect(Collectors.toList()).get(0).getRequestCode();
+            
+            
+            switch (selectedReqCode) {
+                case "(сул_045)":
+                    if(sendToBank.isVisible()) {
+                       sendToBank.visibleProperty().set(false); 
+                    }
+                    if(departmentNumber.visibleProperty().getValue()) {
+                        departmentNumber.visibleProperty().set(false);
+                        departmentNumberLabel.visibleProperty().set(false);
+                    }
+                    if(opfr.getItems().size() < 2) {
+                        requestValueList = FXCollections.observableArrayList(requestList.stream().map(e -> e.getName()).collect(Collectors.toList()));
+                        request.setItems(requestValueList);
+                        request.setValue(requestValueList.get(0));
+                    }
+                    if(opfr.isDisabled()) {
+                        opfr.setDisable(false);
+                        upfr.setDisable(false);
+                    }
+                    subRequest.visibleProperty().set(false);
+                    dateSending.setValue(null);
+                    dateSending.visibleProperty().set(true);
+                    labelSubRequest.setText("Дата отправки:");
+                    labelOrdinalNumber.visibleProperty().set(true);
+                    ordinalNumber.getEditor().clear();
+                    valueFactory = new IntegerSpinnerValueFactory(0, 999999);
+                    ordinalNumber.setValueFactory(valueFactory);
+                    ordinalNumber.visibleProperty().set(true);
+                    snils.textProperty().setValue("");
+                    surname.textProperty().setValue("");
+                    firstName.textProperty().setValue("");
+                    fathersName.textProperty().setValue("");
+
+                    start.disableProperty().bind(Bindings.isEmpty(surname.textProperty())
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(firstName.getText()).find(), firstName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(surname.getText()).find(), surname.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(fathersName.getText()).find(), fathersName.textProperty()))
+                            .or(Bindings.isEmpty(firstName.textProperty()))
+                            .or(Bindings.isEmpty(fathersName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> surname.getText().isBlank(), surname.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> firstName.getText().isBlank(), firstName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> fathersName.getText().isBlank(), fathersName.textProperty()))
+                    );
+                    break;
+                case "DNR":
+                case "ЛНР":
+                case "XO":
+                case "ZO":
+                    if(sendToBank.isVisible()) {
+                       sendToBank.visibleProperty().set(false); 
+                    }
+                    if(departmentNumber.visibleProperty().getValue()) {
+                        departmentNumber.visibleProperty().set(false);
+                        departmentNumberLabel.visibleProperty().set(false);
+                    }
+                    surname.visibleProperty().set(false);
+                    firstName.visibleProperty().set(false);
+                    fathersName.visibleProperty().set(false);
+                    snils.visibleProperty().set(true);
+                    surnameLabel.setText("Снилс:");
+                    opfr.setDisable(true);
+                    upfr.setDisable(true);
+                    surname.textProperty().setValue("");
+                    firstName.textProperty().setValue("");
+                    fathersName.textProperty().setValue("");
+                    snils.textProperty().addListener(new ChangeListener<String>() {
+                        @Override
+                        public void changed(ObservableValue<? extends String> observable, String oldValue,
+                                String newValue) {
+                            if (!newValue.matches("^\\d{3}-\\d{3}-\\d{3} \\d{2}$")) {
+                                snils.setText(newValue.replaceAll("[^\\d-\\s]", ""));
+                            }
+                            if ((snils.getText().length() == 3 || snils.getText().length() == 7) && oldValue.length() < newValue.length()) {
+                                snils.setText(snils.getText() + "-");
+                            }
+                            if (snils.getText().length() == 11 && oldValue.length() < newValue.length()) {
+
+                                snils.setText(snils.getText() + " ");
+                            }
+                            if (snils.getText().length() >= 15) {
+                                snils.setText(oldValue);
+                            }
+                        }
+                    });
+
+                    start.disableProperty().bind(Bindings.createBooleanBinding(() -> snils.getText().length() < 14, snils.textProperty()));
+                    break;
+                case "096000000_звд_ЗО":
+                case "096_зрк_ЗО":
+                case "095_045_МК_запрос":
+                case "091000000_вдэкс_ХО":
+                    if(sendToBank.isVisible()) {
+                       sendToBank.visibleProperty().set(false); 
+                    }
+                    opfr.setDisable(true);
+                    upfr.setDisable(true);
+                      if(departmentNumber.visibleProperty().getValue()) {
+                        departmentNumber.visibleProperty().set(false);
+                        departmentNumberLabel.visibleProperty().set(false);
+                    }
+                    break;
                 
-            } else {
-                ordinalNumber.visibleProperty().set(false);
-                ordinalNumber.getEditor().clear();
-                labelOrdinalNumber.visibleProperty().set(false);
-                dateSending.visibleProperty().set(false);
-                dateSending.setValue(null);
-                subRequest.visibleProperty().set(true);
-                labelSubRequest.setText("Подзапрос:");
-                
+                case "096_вдэкс":
+                    if(sendToBank.isVisible()) {
+                       sendToBank.visibleProperty().set(false); 
+                    }
+                    opfr.setDisable(true);
+                    upfr.setDisable(true);
+                    if(!departmentNumber.visibleProperty().getValue()) {
+                        departmentNumber.visibleProperty().set(true);
+                        departmentNumberLabel.visibleProperty().set(true);
+                    }
+                    break;
+                case "доставка":
+                    if(sendToBank.isVisible()) {
+                       sendToBank.visibleProperty().set(false); 
+                    }
+                    if(opfr.isDisabled()) {
+                        opfr.setDisable(false);
+                        upfr.setDisable(false);
+                    }
+                    opfrList = FXCollections.observableArrayList(finalizeRegions.stream().filter(j -> j.getRegionCode().equals("093")).map(e -> e.getRegionName()).collect(Collectors.toList()));
+                    opfr.setItems(opfrList);
+                    opfr.setValue(opfrList.get(0));
+                    if(!departmentNumber.visibleProperty().getValue()) {
+                        departmentNumber.visibleProperty().set(true);
+                        departmentNumberLabel.visibleProperty().set(true);
+                    }
+                    break;
+                case "зрк":
+                    if(sendToBank.isVisible()) {
+                       sendToBank.visibleProperty().set(false); 
+                    }
+                    if(departmentNumber.visibleProperty().getValue()) {
+                        departmentNumber.visibleProperty().set(false);
+                        departmentNumberLabel.visibleProperty().set(false);
+                    }
+                     if(opfr.isDisabled()) {
+                        opfr.setDisable(false);
+                        upfr.setDisable(false);
+                        }
+                        opfrList = FXCollections.observableArrayList(finalizeRegions.stream().filter(j -> j.getRegionCode().equals("094")).map(e -> e.getRegionName()).collect(Collectors.toList()));
+                        opfr.setItems(opfrList);
+                        opfr.setValue(opfrList.get(0));
+                    break;
+                case "межведком_запрос":
+                    if(sendToBank.isVisible()) {
+                       sendToBank.visibleProperty().set(false); 
+                    }
+                    if(departmentNumber.visibleProperty().getValue()) {
+                        departmentNumber.visibleProperty().set(false);
+                        departmentNumberLabel.visibleProperty().set(false);
+                    }
+                     if(opfr.isDisabled()) {
+                        opfr.setDisable(false);
+                        upfr.setDisable(false);
+                        }
+                        opfrList = FXCollections.observableArrayList(finalizeRegions.stream().filter(j -> j.getRegionCode().equals("093")).map(e -> e.getRegionName()).collect(Collectors.toList()));
+                        opfr.setItems(opfrList);
+                        opfr.setValue(opfrList.get(0));
+                    break;
+                   
+                case "вдэкс":
+                    if(sendToBank.isVisible()) {
+                       sendToBank.visibleProperty().set(false); 
+                    }
+                    if(request.getSelectionModel().getSelectedItem().contains("ЛНР")) {
+                        if(opfr.isDisabled()) {
+                        opfr.setDisable(false);
+                        upfr.setDisable(false);
+                        }
+                        opfrList = FXCollections.observableArrayList(finalizeRegions.stream().filter(j -> j.getRegionCode().equals("094")).map(e -> e.getRegionName()).collect(Collectors.toList()));
+                        opfr.setItems(opfrList);
+                        opfr.setValue(opfrList.get(0));
+                        if(!departmentNumber.visibleProperty().getValue()) {
+                        departmentNumber.visibleProperty().set(true);
+                        departmentNumberLabel.visibleProperty().set(true);
+                        
+                    }
+                      
+                    } else {
+                         if(opfr.isDisabled()) {
+                        opfr.setDisable(false);
+                        upfr.setDisable(false);
+                    }
+                     if(opfr.getItems().size() < 2) {
+                        opfrList = FXCollections.observableArrayList(finalizeRegions.stream().map(e -> e.getRegionName()).collect(Collectors.toList()));
+                        opfr.setItems(opfrList);
+                        opfr.setValue(opfrList.get(0));
+                    }
+                   
+                    if(departmentNumber.visibleProperty().getValue()) {
+                        departmentNumber.visibleProperty().set(false);
+                        departmentNumberLabel.visibleProperty().set(false);
+                    }
+                    ordinalNumber.visibleProperty().set(false);
+                    snils.visibleProperty().set(false);
+                    surname.visibleProperty().set(true);
+                    firstName.visibleProperty().set(true);
+                    fathersName.visibleProperty().set(true);
+                    surnameLabel.setText("Фамилия:");
+                    ordinalNumber.getEditor().clear();
+                    labelOrdinalNumber.visibleProperty().set(false);
+                    dateSending.visibleProperty().set(false);
+                    dateSending.setValue(null);
+                    subRequest.visibleProperty().set(true);
+                    labelSubRequest.setText("Подзапрос:");
+                    opfr.setDisable(false);
+                    upfr.setDisable(false);
+                    snils.textProperty().setValue("");
+                    surname.textProperty().setValue("");
+                    firstName.textProperty().setValue("");
+                    fathersName.textProperty().setValue("");
+
+                    start.disableProperty().bind(Bindings.isEmpty(surname.textProperty())
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(firstName.getText()).find(), firstName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(surname.getText()).find(), surname.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(fathersName.getText()).find(), fathersName.textProperty()))
+                            .or(Bindings.isEmpty(firstName.textProperty()))
+                            .or(Bindings.isEmpty(fathersName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> surname.getText().isBlank(), surname.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> firstName.getText().isBlank(), firstName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> fathersName.getText().isBlank(), fathersName.textProperty()))
+                    );
+                    } 
+                      break;
+                case "зилс":
+                    sendToBank.visibleProperty().set(true);
+                     if(opfr.isDisabled()) {
+                        opfr.setDisable(false);
+                        upfr.setDisable(false);
+                    }
+                     if(opfr.getItems().size() < 2) {
+                        opfrList = FXCollections.observableArrayList(finalizeRegions.stream().map(e -> e.getRegionName()).collect(Collectors.toList()));
+                        opfr.setItems(opfrList);
+                        opfr.setValue(opfrList.get(0));
+                    }
+                   
+                    if(departmentNumber.visibleProperty().getValue()) {
+                        departmentNumber.visibleProperty().set(false);
+                        departmentNumberLabel.visibleProperty().set(false);
+                    }
+                    ordinalNumber.visibleProperty().set(false);
+                    snils.visibleProperty().set(false);
+                    surname.visibleProperty().set(true);
+                    firstName.visibleProperty().set(true);
+                    fathersName.visibleProperty().set(true);
+                    surnameLabel.setText("Фамилия:");
+                    ordinalNumber.getEditor().clear();
+                    labelOrdinalNumber.visibleProperty().set(false);
+                    dateSending.visibleProperty().set(false);
+                    dateSending.setValue(null);
+                    subRequest.visibleProperty().set(true);
+                    labelSubRequest.setText("Подзапрос:");
+                    opfr.setDisable(false);
+                    upfr.setDisable(false);
+                    snils.textProperty().setValue("");
+                    surname.textProperty().setValue("");
+                    firstName.textProperty().setValue("");
+                    fathersName.textProperty().setValue("");
+
+                    start.disableProperty().bind(Bindings.isEmpty(surname.textProperty())
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(firstName.getText()).find(), firstName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(surname.getText()).find(), surname.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(fathersName.getText()).find(), fathersName.textProperty()))
+                            .or(Bindings.isEmpty(firstName.textProperty()))
+                            .or(Bindings.isEmpty(fathersName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> surname.getText().isBlank(), surname.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> firstName.getText().isBlank(), firstName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> fathersName.getText().isBlank(), fathersName.textProperty()))
+                    );
+                    break;
+                default:
+                    if(sendToBank.isVisible()) {
+                       sendToBank.visibleProperty().set(false); 
+                    }
+                    if(opfr.isDisabled()) {
+                        opfr.setDisable(false);
+                        upfr.setDisable(false);
+                    }
+                     if(opfr.getItems().size() < 2) {
+                        opfrList = FXCollections.observableArrayList(finalizeRegions.stream().map(e -> e.getRegionName()).collect(Collectors.toList()));
+                        opfr.setItems(opfrList);
+                        opfr.setValue(opfrList.get(0));
+                    }
+                   
+                    if(departmentNumber.visibleProperty().getValue()) {
+                        departmentNumber.visibleProperty().set(false);
+                        departmentNumberLabel.visibleProperty().set(false);
+                    }
+                    ordinalNumber.visibleProperty().set(false);
+                    snils.visibleProperty().set(false);
+                    surname.visibleProperty().set(true);
+                    firstName.visibleProperty().set(true);
+                    fathersName.visibleProperty().set(true);
+                    surnameLabel.setText("Фамилия:");
+                    ordinalNumber.getEditor().clear();
+                    labelOrdinalNumber.visibleProperty().set(false);
+                    dateSending.visibleProperty().set(false);
+                    dateSending.setValue(null);
+                    subRequest.visibleProperty().set(true);
+                    labelSubRequest.setText("Подзапрос:");
+                    opfr.setDisable(false);
+                    upfr.setDisable(false);
+                    snils.textProperty().setValue("");
+                    surname.textProperty().setValue("");
+                    firstName.textProperty().setValue("");
+                    fathersName.textProperty().setValue("");
+
+                    start.disableProperty().bind(Bindings.isEmpty(surname.textProperty())
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(firstName.getText()).find(), firstName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(surname.getText()).find(), surname.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(fathersName.getText()).find(), fathersName.textProperty()))
+                            .or(Bindings.isEmpty(firstName.textProperty()))
+                            .or(Bindings.isEmpty(fathersName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> surname.getText().isBlank(), surname.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> firstName.getText().isBlank(), firstName.textProperty()))
+                            .or(Bindings.createBooleanBinding(() -> fathersName.getText().isBlank(), fathersName.textProperty()))
+                    );
+                    break;
+
             }
+            
+            
+            
             
             
             
@@ -508,22 +808,7 @@ public class PrimaryController {
         });
         
         
-
-        choiceSuff.visibleProperty().bind(
-                Bindings.equal("Воронежская область", upfr.getSelectionModel().selectedItemProperty()).or(
-                        Bindings.equal("Севастополь", upfr.getSelectionModel().selectedItemProperty()).or(
-                                Bindings.equal("Республика Крым", upfr.getSelectionModel().selectedItemProperty()).or(
-                                        Bindings.equal("Ростовская область", upfr.getSelectionModel().selectedItemProperty())))));
-
-        labelSuff.visibleProperty().bind(
-                Bindings.equal("Воронежская область", upfr.getSelectionModel().selectedItemProperty()).or(
-                        Bindings.equal("Севастополь", upfr.getSelectionModel().selectedItemProperty()).or(
-                                Bindings.equal("Республика Крым", upfr.getSelectionModel().selectedItemProperty()).or(
-                                        Bindings.equal("Ростовская область", upfr.getSelectionModel().selectedItemProperty())))));
-        
-        Pattern inputTextFieldPattern = Pattern.compile("[;*\"|/:?<>]");
-        
-         start.disableProperty().bind(Bindings.isEmpty(surname.textProperty())
+            start.disableProperty().bind(Bindings.isEmpty(surname.textProperty())
                  .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(firstName.getText()).find(), firstName.textProperty()))
                  .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(surname.getText()).find(), surname.textProperty()))
                  .or(Bindings.createBooleanBinding(() -> inputTextFieldPattern.matcher(fathersName.getText()).find(), fathersName.textProperty()))
@@ -534,6 +819,15 @@ public class PrimaryController {
                  .or(Bindings.createBooleanBinding(() -> fathersName.getText().isBlank(), fathersName.textProperty()))
                 
                  );
+            
+         
+            
+
+
+
+        
+   
+        
 
 
 //        request.getSelectionModel().selectedItemProperty().addListener((Override, t, t1) -> {
@@ -622,8 +916,7 @@ public class PrimaryController {
 
         // Работа с суффиксом
 //        ObservableList<String> observableArrayKeys = FXCollections.observableArrayList(stateCode.values().stream().collect(Collectors.toList()));
-//        choiceSuff.setItems(observableArrayKeys);
-//        choiceSuff.setValue(choiceSuff.getItems().get(0));
+
 
     }
 
@@ -767,6 +1060,22 @@ public class PrimaryController {
             }
         }
         str = selectedDirectory.getAbsolutePath() + "\\";
+        
+        StringBuilder out = new StringBuilder();
+        out.delete(0, out.length());
+        out.append(str);
+        
+        if(snils.isVisible()) {
+            
+            out.append(snils.textProperty().getValue());
+            out.append("_");
+            if(!subRequest.getValue().contains("отсутствуют подзапросы")) {
+                out.append(subRequestList.stream().filter(e -> e.getSubRequestName().equals(subRequest.getValue())).collect(Collectors.toList()).get(0).getSubRequestCode());
+                out.append("_");
+            }
+            out.append(requestList.stream().filter(e -> e.getName().equals(request.getValue())).collect(Collectors.toList()).get(0).getRequestCode());
+        
+        } else {
         // инициализация имени
         String fName = firstName.getText();
         // инициализация отчества
@@ -781,7 +1090,7 @@ public class PrimaryController {
         if(selectedReg.getDepartments().isEmpty()) {
             val = selectedReg.getRegionCode();
         } else {
-         Department resultDepartment = departments.stream().filter(e -> e.getDepartmentName().equals(upfr.getValue())).collect(Collectors.toList()).get(0);
+         Department resultDepartment = departments.stream().filter(e -> e.getDepartmentName().equals(upfr.getValue())).filter(j -> j.getRegionCode().equals(selectedReg.getRegionCode())).collect(Collectors.toList()).get(0);
         val = resultDepartment.getRegionCode();
         dep = resultDepartment.getDepartmentCode();
         }
@@ -799,88 +1108,162 @@ public class PrimaryController {
                 .collect(Collectors.toList())
                 .get(0);
         
-        
-        if(resultRequest.getSubRequests().size() > 0 && null == dateSending.getValue()) {
-            SubRequest resultSubRequest = resultRequest.getSubRequests()
+  
+            switch (resultRequest.getRequestCode()) {
+                case "096000000_звд_ЗО":
+                    val = resultRequest.getRequestCode();
+                    out.append(val);
+                    out.append("_");
+                    out.append(sName);
+                    out.append(" ");
+                    out.append(fName);
+                    out.append(".");
+                    out.append(fathName);
+                    break;
+                case "сул_045":
+                    String day;
+                    String month;
+                    if(dateSending.getValue().getDayOfMonth() < 10) {
+                        day = "0" + dateSending.getValue().getDayOfMonth();
+                    } else {
+                        day = "" + dateSending.getValue().getDayOfMonth();
+                    }
+
+                    if(dateSending.getValue().getMonthValue() < 10) {
+                        month = "0" + dateSending.getValue().getMonthValue();
+                    } else {
+                        month = "" + dateSending.getValue().getMonthValue();
+                    }
+                    val = val + "_" + resultRequest.getRequestCode() + "_" + day + month
+                            + "_" + ordinalNumber.getEditor().getText();
+                    out.append(val);
+                    break;
+                case "091000000_вдэкс_ХО":
+                    val = resultRequest.getRequestCode();
+                    out.append(val);
+                    out.append("_");
+                    out.append(sName);
+                    out.append(" ");
+                    out.append(fName);
+                    out.append(".");
+                    out.append(fathName);
+                    break;
+                case "096_вдэкс":
+                    val = resultRequest.getRequestCode();
+                    out.append(val);
+                    out.append("_");
+                    out.append(sName);
+                    out.append(" ");
+                    out.append(fName);
+                    out.append(".");
+                    out.append(fathName);
+                    out.append("_" + departmentNumber.textProperty().getValue());
+                    break;
+                case "096_зрк_ЗО":
+                    val = resultRequest.getRequestCode();
+                    out.append(val);
+                    out.append("_");
+                    out.append(sName);
+                    out.append(" ");
+                    out.append(fName);
+                    out.append(".");
+                    out.append(fathName);
+                    out.append("_запрос");
+                    break;
+                case "095_045_МК_запрос":
+                    val = resultRequest.getRequestCode();
+                    out.append(val);
+                    out.append("_");
+                    out.append(sName);
+                    out.append(" ");
+                    out.append(fName);
+                    out.append(".");
+                    out.append(fathName);
+                    break;
+                case "доставка":
+                     if(resultRequest.getSubRequests().size() > 0) {
+                        SubRequest resultSubRequest = resultRequest.getSubRequests()
+                            .stream()
+                            .filter(e -> e.getSubRequestName()
+                                    .equals(subRequest.getValue()))
+                            .collect(Collectors.toList())
+                            .get(0);
+                    val = val + dep;
+                    
+                    val = val + "_" + resultRequest.getRequestCode() + "_" + resultSubRequest.getSubRequestCode();
+                   } else {
+                       val = val + dep;
+                       
+                       val = val + "_" + resultRequest.getRequestCode();
+                   }
+                    out.append(val);
+                
+                    out.append("_");
+                    out.append(sName);
+                    out.append(" ");
+                    out.append(fName);
+                    out.append(".");
+                    out.append(fathName);
+                    out.append("_" + departmentNumber.textProperty().getValue());
+                    break;
+                default:
+
+           if(resultRequest.getSubRequests().size() > 0) {
+                SubRequest resultSubRequest = resultRequest.getSubRequests()
                     .stream()
                     .filter(e -> e.getSubRequestName()
                             .equals(subRequest.getValue()))
                     .collect(Collectors.toList())
                     .get(0);
-           
-            val = val + dep + "_" + resultRequest.getRequestCode() + "_" + resultSubRequest.getSubRequestCode();
-        } else if(null != dateSending.getValue()) {
-            String day;
-            String month;
-            if(dateSending.getValue().getDayOfMonth() < 10) {
-                day = "0" + dateSending.getValue().getDayOfMonth();
-            } else {
-                day = "" + dateSending.getValue().getDayOfMonth();
-            }
-            
-            if(dateSending.getValue().getMonthValue() < 10) {
-                month = "0" + dateSending.getValue().getMonthValue();
-            } else {
-                month = "" + dateSending.getValue().getMonthValue();
-            }
-            val = val + "_" + resultRequest.getRequestCode() + "_" + day + month
-                    + "_" + ordinalNumber.getEditor().getText();
-                  
-        } else {
-            val = val + dep + "_" + resultRequest.getRequestCode();
-        }
+            val = val + dep;
+            if(sendToBank.selectedProperty().getValue()) {
+                            val = val + "сбр";
+                        }
+            val = val + "_" + resultRequest.getRequestCode() + "_" + resultSubRequest.getSubRequestCode();
+           } else {
+               val = val + dep;
+               if(sendToBank.selectedProperty().getValue()) {
+                            val = val + "сбр";
+                        }
+               val = val + "_" + resultRequest.getRequestCode();
+           }
+         
 
         
         // Получение пути сохранения файла
-        StringBuilder out = new StringBuilder();
-        out.delete(0, out.length());
-        out.append(str);
-        if (choiceSuff.isVisible()) {
-            if (null != choiceSuff.getSelectionModel().getSelectedItem()) {
-                if (choiceSuff.getSelectionModel().getSelectedItem().contains("ЛНР") && isVd) {
-                    out.append(val.substring(0, 3));
-                    isVoronezh = true;
-
-                } else {
-                    out.append(val);
-                    isVoronezh = false;
-                }
-            }
-
-        } else {
-            out.append(val);
-        }
-
         
-        
-        if (sendToBank.selectedProperty().getValue()) {
-            out.append("(ЦБ)");
-        }
-        
-       // out.append("_");
-        if (remember.selectedProperty().getValue()) {
-            out.append("(н)");
-        }
-        //out.append(RequestFormirovationService.getRequestValue(requestList, requestFile.getValue()));
+       
 
-        //if
-        if (choiceSuff.isVisible()) {
-            if (null != choiceSuff.getSelectionModel().getSelectedItem()) {
-                out.append("_");
-                if (isVd && isVoronezh) {
-                    out.append("ЛО");
-                } else {
-                    out.append(choiceSuff.getSelectionModel().getSelectedItem());
-                }
+//
 
-            }
-        }
+//
+//        
+//        
+//        if (sendToBank.selectedProperty().getValue()) {
+//            out.append("(ЦБ)");
+//        }
+//        
+//       // out.append("_");
+
+//        //out.append(RequestFormirovationService.getRequestValue(requestList, requestFile.getValue()));
+//
+
+//        }
+        out.append(val);
         out.append("_");
         out.append(sName);
         out.append(" ");
         out.append(fName);
         out.append(".");
         out.append(fathName);
+            }
+        
+      
+        }
+        if(vdeksLNR) {
+            out.append("_");
+            out.append(departmentNumber.textProperty().getValue());
+        }
         out.append(".zip");
 
         System.out.println(out);
