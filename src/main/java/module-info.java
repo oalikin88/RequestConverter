@@ -1,4 +1,5 @@
 module com.mycompany.requestconverter {
+    requires static lombok;
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
@@ -6,6 +7,7 @@ module com.mycompany.requestconverter {
     requires javafx.base;
     requires java.naming;
     requires java.base;
+    
   
 
     opens com.mycompany.requestconverter to javafx.fxml;

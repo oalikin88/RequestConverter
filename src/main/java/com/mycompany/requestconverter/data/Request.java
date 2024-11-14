@@ -16,6 +16,8 @@ public class Request {
     private int id;
     private String name;
     private String requestCode;
+    private Pattern pattern;
+    private Spravochnik spravochnik;
     private List<SubRequest> subRequests = new ArrayList<>();
     
     public Request() {
@@ -25,9 +27,10 @@ public class Request {
         this.name = name;
     }
 
-    public Request(String name, String requestCode) {
+    public Request(String name, String requestCode, Pattern pattern) {
         this.name = name;
         this.requestCode = requestCode;
+        this.pattern = pattern;
     }
 
     public String getName() {
@@ -69,6 +72,23 @@ public class Request {
         this.subRequests.add(subRequest);
     }
 
+    public Pattern getPattern() {
+        return pattern;
+    }
+
+    public void setPattern(Pattern pattern) {
+        this.pattern = pattern;
+    }
+
+    public Spravochnik getSpravochnik() {
+        return spravochnik;
+    }
+
+    public void setSpravochnik(Spravochnik spravochnik) {
+        this.spravochnik = spravochnik;
+    }
+    
+    
 
     @Override
     public String toString() {

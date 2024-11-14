@@ -5,8 +5,10 @@
 package com.mycompany.requestconverter.service;
 
 import com.mycompany.requestconverter.App;
-import com.mycompany.requestconverter.data.DataHistory;
+import com.mycompany.requestconverter.data.Spravochnik;
 import com.mycompany.requestconverter.data.Department;
+import com.mycompany.requestconverter.data.Fields;
+import com.mycompany.requestconverter.data.Pattern;
 import com.mycompany.requestconverter.data.Region;
 import com.mycompany.requestconverter.data.Request;
 import com.mycompany.requestconverter.data.SubRequest;
@@ -38,8 +40,11 @@ import java.util.logging.Logger;
  * @author 041AlikinOS
  */
 public class Content {
-
+    
+    
     public static String pathToRegions = System.getProperty("user.dir") + "/data/regions.csv";
+    public static String pathToFields = System.getProperty("user.dir") + "/data/fields.csv";
+    public static String pathToCatalog = System.getProperty("user.dir") + "/data/spravochnik.csv";
     public static String pathToDepartments = System.getProperty("user.dir") + "/data/departments.csv";
     public static String pathToRequest = System.getProperty("user.dir") + "/data/request.csv";
     public static String pathToSubRequest = System.getProperty("user.dir") + "/data/sub_request.csv";
@@ -49,6 +54,37 @@ public class Content {
     DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     Date currentDate;
 
+    public List<Spravochnik> getSpravochnikContent() throws IOException {
+      Path out;
+
+        try {
+            out = Files.createFile(Paths.get(pathToCatalog));
+        } catch (FileAlreadyExistsException faee) {
+            out = Paths.get(pathToCatalog);
+        }
+        
+        List<Spravochnik> catalogs = new ArrayList<>();
+        String lineCatalog;
+        BufferedReader reader = null;
+        try{
+            reader = new BufferedReader(new FileReader(out.toFile(), Charset.forName("UTF-8")));
+            while ((lineCatalog = reader.readLine()) != null) {
+                String[] parts = lineCatalog.split(";");
+                Spravochnik catalog = new Spravochnik();
+                catalog.setId(Integer.parseInt(parts[0]));
+                catalog.setName(parts[1]);
+                catalogs.add(catalog);
+            }
+        } catch(IOException e) {
+            e.getStackTrace();
+            throw new IOException("Отсутствует файл catalog.csv");
+        } finally{
+            reader.close();
+        }
+        return catalogs;
+    }
+    
+    
     public Set<Region> getRegionsContent() throws IOException, URISyntaxException, NullPointerException {
        // String request = pathToRegions.replace("spr", target);
        //File file;
@@ -70,7 +106,7 @@ public class Content {
     while ((lineRegions = readerRegions.readLine()) != null)
     {
           String[] parts = lineRegions.split(";");
-          Region region = new Region(parts[0], parts[1]);
+          Region region = new Region(Integer.parseInt(parts[0]), parts[1], parts[2], Integer.parseInt(parts[3]));
           regions.add(region);
          
     }
@@ -109,7 +145,7 @@ public class Content {
     while ((lineDepartments = readerDepartments.readLine()) != null)
     {
           String[] parts = lineDepartments.split(";");
-          Department department = new Department(parts[0], parts[1], parts[2]);
+          Department department = new Department(Integer.parseInt(parts[0]), parts[1], parts[2], parts[3], parts[4], Integer.parseInt(parts[5]));
           departments.add(department);
          
     }
@@ -123,11 +159,11 @@ public class Content {
          return departments;
     }
     
-    public List<Region> finalizeRegions(List<Region> inputRegions, List<Department> inputDepartments) {
-        List<Region> out = new ArrayList<>();
+    public Set<Region> finalizeRegions(List<Region> inputRegions, List<Department> inputDepartments) {
+        Set<Region> out = new HashSet<>();
         for(Region region : inputRegions) {
             for(Department department : inputDepartments) {
-                if(region.getRegionCode().trim().equals(department.getRegionCode().trim())) {
+                if(region.getRegionCode().trim().equals(department.getRegionCode().trim()) && region.getSpravochnikId() == department.getSpravochnikId()) {
                     region.addDepartment(department);
                 }
             }
@@ -154,9 +190,17 @@ public class Content {
     {
           String[] parts = lineRequest.split(";");
           Request request = new Request();
+          Spravochnik spr = new Spravochnik();
+          Pattern pattern = new Pattern();
           request.setId(Integer.parseInt(parts[0]));
           request.setRequestCode(parts[1]);
           request.setName(parts[2]);
+          spr.setId(Integer.parseInt(parts[3]));
+          spr.setName(parts[4]);
+          pattern.setPatternId(Integer.parseInt(parts[5]));
+          pattern.setPattern(parts[6]);
+          request.setSpravochnik(spr);
+          request.setPattern(pattern);
           requests.add(request);
          
     }
@@ -169,6 +213,40 @@ public class Content {
          }
          return requests;
     }
+    
+    public List<Fields> getFields() throws IOException  {
+         Path out;
+
+        try {
+            out = Files.createFile(Paths.get(pathToFields));
+        } catch (FileAlreadyExistsException faee) {
+            out = Paths.get(pathToFields);
+        }
+        List<Fields> fields = new ArrayList<>();
+        
+         String lineRequest;
+         BufferedReader readerRequest = null;
+         try {
+          readerRequest = new BufferedReader(new FileReader(out.toFile(), Charset.forName("UTF-8")));
+    while ((lineRequest = readerRequest.readLine()) != null)
+    {
+          String[] parts = lineRequest.split(";");
+          Fields field = new Fields();
+          field.setPatternId(Integer.parseInt(parts[0]));
+          field.setFieldId(Integer.parseInt(parts[1]));
+          field.setField(parts[2]);
+          fields.add(field);
+    }
+        
+        } catch (IOException e) {
+            e.getStackTrace();
+            throw new IOException("Отсутствует файл departments.csv");
+        } finally {
+             readerRequest.close();
+         }
+         return fields;
+    }
+    
     
     
     public List<SubRequest> getSubRequests() throws IOException  {
@@ -220,6 +298,20 @@ public class Content {
         }
         return out;
     }
+    
+    public List<Request> addFieldsToRequests(List<Request> inputRequests, List<Fields> fields) {
+        List<Request> out = new ArrayList<>();
+        for(Request req : inputRequests) {
+            for(Fields field : fields) {
+                if(req.getPattern().getPatternId() == field.getPatternId()) {
+                    req.getPattern().getFields().add(field);
+                }
+            }
+            out.add(req);
+        }
+        return out;
+    }
+    
     // получение имени компьютера
     public String getComputerName() {
         Map<String, String> env = System.getenv();
@@ -273,9 +365,11 @@ public class Content {
             file = new File(getPath.toUri());
             writer = new FileWriter(file, StandardCharsets.UTF_8);
             for (Region rec : inputList) {
+                String regionId = "" + rec.getRegionId();
                 String regionCode = rec.getRegionCode();
                 String regionName = rec.getRegionName();
-                writer.write(regionCode + ";" + regionName);
+                String spravochnikId = "" + rec.getSpravochnikId();
+                writer.write(regionId + ";" + regionCode + ";" + regionName + ";" + spravochnikId);
                 if (inputList.iterator().hasNext()) {
                     writer.write("\n");
                 }
@@ -306,10 +400,13 @@ public class Content {
             file = new File(getPath.toUri());
             writer = new FileWriter(file, StandardCharsets.UTF_8);
             for (Department rec : inputList) {
+                String departmentId = "" + rec.getDepartmentId();
                 String regionCode = rec.getRegionCode();
+                String territoryCode = rec.getTerritoryCode();
                 String departmentCode = rec.getDepartmentCode();
                 String departmentName = rec.getDepartmentName();
-                writer.write(regionCode + ";" + departmentCode + ";" + departmentName);
+                String spravochnikId = "" + rec.getSpravochnikId();
+                writer.write(departmentId + ";" + regionCode + ";" + territoryCode + ";" + departmentCode + ";" + departmentName + ";" + spravochnikId);
                 if (inputList.iterator().hasNext()) {
                     writer.write("\n");
                 }
@@ -329,6 +426,77 @@ public class Content {
 
     }
     
+    
+       public void writeCatalogData(List<Spravochnik> inputList, String target) throws URISyntaxException {
+ 
+        File file;
+        Path getPath;
+        FileWriter writer = null;
+
+        try {
+            getPath = Paths.get(target);
+            file = new File(getPath.toUri());
+            writer = new FileWriter(file, StandardCharsets.UTF_8);
+            for (Spravochnik rec : inputList) {
+                String catalogId = "" + rec.getId();
+                String name = rec.getName();
+                writer.write(catalogId + ";" + name);
+                if (inputList.iterator().hasNext()) {
+                    writer.write("\n");
+                }
+            }
+
+            System.out.println("Запись в файл прошла успешно.");
+        } catch (IOException ex) {
+            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (writer != null)
+            try {
+                writer.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Content.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }
+    
+       
+       public void writeFieldsData(List<Fields> inputList, String target) throws URISyntaxException {
+ 
+        File file;
+        Path getPath;
+        FileWriter writer = null;
+
+        try {
+            getPath = Paths.get(target);
+            file = new File(getPath.toUri());
+            writer = new FileWriter(file, StandardCharsets.UTF_8);
+            for (Fields rec : inputList) {
+                String patternId = "" + rec.getPatternId();
+                String fieldId = "" + rec.getFieldId();
+                String field = rec.getField();
+                writer.write(patternId + ";" + fieldId + ";" + field);
+                if (inputList.iterator().hasNext()) {
+                    writer.write("\n");
+                }
+            }
+
+            System.out.println("Запись в файл прошла успешно.");
+        } catch (IOException ex) {
+            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (writer != null)
+            try {
+                writer.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Content.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }
+       
+       
+    
     public void writeRequestData(List<Request> inputList, String target) throws URISyntaxException {
  
         File file;
@@ -343,7 +511,11 @@ public class Content {
                 String requestId = "" + rec.getId();
                 String requestCode = rec.getRequestCode();
                 String requestName = rec.getName();
-                writer.write(requestId + ";" + requestCode + ";" + requestName);
+                String requestPattern = rec.getPattern().getPattern();
+                String requestPatternId = "" + rec.getPattern().getPatternId();
+                String spravochnikId = "" + rec.getSpravochnik().getId();
+                String spravochnikName = rec.getSpravochnik().getName();
+                writer.write(requestId + ";" + requestCode + ";" + requestName + ";" + spravochnikId + ";" + spravochnikName + ";" + requestPatternId + ";" + requestPattern);
                 if (inputList.iterator().hasNext()) {
                     writer.write("\n");
                 }

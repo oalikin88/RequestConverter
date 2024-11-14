@@ -51,6 +51,13 @@
             <version>5.3.25</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>   
         <sourceDirectory>src/main/java</sourceDirectory>
@@ -67,6 +74,17 @@
                 <version>3.8.0</version>
                 <configuration>
                     <release>11</release>
+                    <annotationProcessorPaths>
+                    <path>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>1.18.24</version>
+                    </path>
+                </annotationProcessorPaths>
+<!--                <compilerArgs>
+                <arg>-sourcepath</arg>
+                <arg>${project.basedir}/src/main/java${path.separator}${project.basedir}/target/generated-sources/annotations${path.separator}/</arg>
+                </compilerArgs>-->
                 </configuration>
             </plugin>         
             <plugin>
